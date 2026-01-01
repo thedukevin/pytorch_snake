@@ -1,34 +1,22 @@
 ==========================================================================================
 Layer (type:depth-idx)                   Output Shape              Param #
 ==========================================================================================
-CNN                                      [1, 4]                    --
-├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
-├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
-├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
-├─Linear: 1-4                            [1, 128]                  51,328
-├─Linear: 1-5                            [1, 4]                    516
-├─Linear: 1-6                            [1, 1]                    129
+CNN                                      [1, 100]                  --
+├─Conv2d: 1-1                            [1, 64, 10, 10]           4,096
+├─Conv2d: 1-2                            [1, 64, 10, 10]           36,928
+├─MaxPool2d: 1-3                         [1, 64, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  819,712
+├─Linear: 1-5                            [1, 100]                  51,300
+├─Linear: 1-6                            [1, 1]                    513
 ==========================================================================================
-Total params: 55,317
-Trainable params: 55,317
+Total params: 912,549
+Trainable params: 912,549
 Non-trainable params: 0
-Total mult-adds (M): 0.39
+Total mult-adds (M): 4.97
 ==========================================================================================
 Input size (MB): 0.00
-Forward/backward pass size (MB): 0.03
-Params size (MB): 0.22
-Estimated Total Size (MB): 0.25
+Forward/backward pass size (MB): 0.11
+Params size (MB): 3.65
+Estimated Total Size (MB): 3.76
 ==========================================================================================
-Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2025-12-29 00:33:44.278763Iteration: 100 Score: 0.775 Game Length: 99.6503125 Timestamp: 2025-12-29 00:35:43.233256
-Iteration: 200 Score: 1.1596875 Game Length: 99.098125 Timestamp: 2025-12-29 00:37:44.637821
-Iteration: 300 Score: 3.985 Game Length: 97.3990625 Timestamp: 2025-12-29 00:39:41.833797
-Iteration: 400 Score: 7.9403125 Game Length: 97.1040625 Timestamp: 2025-12-29 00:41:41.207281
-Starting training, Previous iterations: 400 Current iterations: 1600 Timestamp: 2025-12-29 00:45:48.910994
-Iteration: 500 Score: 10.65875 Game Length: 96.348125 Timestamp: 2025-12-29 00:47:48.611194
-Iteration: 600 Score: 11.1821875 Game Length: 96.4490625 Timestamp: 2025-12-29 00:49:46.895159
-Iteration: 700 Score: 11.803125 Game Length: 96.7453125 Timestamp: 2025-12-29 00:51:45.178877
-Iteration: 800 Score: 12.006875 Game Length: 96.9178125 Timestamp: 2025-12-29 00:53:43.729528
-Iteration: 900 Score: 12.2753125 Game Length: 96.174375 Timestamp: 2025-12-29 00:55:41.538749
-Iteration: 1000 Score: 12.30125 Game Length: 96.775625 Timestamp: 2025-12-29 00:57:39.749284
-Iteration: 1100 Score: 12.4325 Game Length: 96.8628125 Timestamp: 2025-12-29 00:59:38.880623
-Iteration: 1200 Score: 12.406875 Game Length: 96.9021875 Timestamp: 2025-12-29 01:01:36.370575
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2025-12-31 22:35:45.056497
