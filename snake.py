@@ -41,7 +41,7 @@ def isValid(pos):
 
 appleReward = 1
 winReward = 0
-loseReward = 0
+loseReward = -5
 
 class Environment:
     def __init__(self):
@@ -117,9 +117,9 @@ class Environment:
         arr = np.zeros((7, boardSize, boardSize))
         for i in range(4):
             arr[i][self.body == i] = 1
-        arr[4, self.head[0], self.head[1]] = 1
-        arr[5, self.tail[0], self.tail[1]] = 1
-        arr[6, self.apple[0], self.apple[1]] = 1
+        arr[4, self.head[0], self.head[1]] = 10
+        arr[5, self.tail[0], self.tail[1]] = 10
+        arr[6, self.apple[0], self.apple[1]] = 10
         return torch.tensor(arr).to(torch.float32)
 
     def __str__(self):
@@ -148,7 +148,6 @@ class Environment:
 # print(env.makeAction(14))
 # print(env)
 
-
 class CNN(nn.Module):
     def __init__(self):
         super().__init__()
@@ -166,6 +165,36 @@ class CNN(nn.Module):
         x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))
         return self.policy(x), self.value(x)
+
+# class CNN(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#         self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
+#         self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+#         self.pool = nn.MaxPool2d(2, 2)
+#         self.fc1 = nn.Linear(32 * 5 * 5, 512)
+#         self.fc2 = nn.Linear(512, 200)
+#         self.value = nn.Linear(512, 1)
+
+#         self.conv3 = nn.Conv2d(34, 32, 3, padding=1)
+#         self.policy = nn.Conv2d(32, 1, 3, padding=1)
+    
+#     def forward(self, x):
+#         B, _, _, _ = x.shape
+#         x = F.relu(self.conv1(x))
+#         x = F.relu(self.conv2(x))
+#         y = self.pool(x)
+#         y = torch.flatten(y, 1)
+#         y = F.relu(self.fc1(y))
+#         value = self.value(y)
+#         y = F.relu(self.fc2(y))
+#         comb = torch.cat([x, y.view(B, 2, 10, 10)], axis=1)
+#         comb = F.relu(self.conv3(comb))
+#         policy = self.policy(comb).view(B, 100)
+#         return policy, value
+
+# m = CNN()
+# print(m(Environment().toTensor().reshape(1, 7, 10, 10)))
 
 class PolicyGradient():
 
@@ -367,6 +396,7 @@ class PolicyGradient():
                                 i = active_thread_hist[t].index(index)
                             except ValueError:
                                 continue
+                            s += 'Step: ' + str(t) + '\n'
                             s += str(trajectories[index][t]['env']) + '\n'
                             s += 'Reward: ' + str(trajectories[index][t]['reward']) + '\n'
                             s += 'Emp Val: ' + str(trajectories[index][t]['emp_val']) + '\n'

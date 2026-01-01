@@ -2,21 +2,23 @@
 Layer (type:depth-idx)                   Output Shape              Param #
 ==========================================================================================
 CNN                                      [1, 100]                  --
-├─Conv2d: 1-1                            [1, 64, 10, 10]           4,096
-├─Conv2d: 1-2                            [1, 64, 10, 10]           36,928
-├─MaxPool2d: 1-3                         [1, 64, 5, 5]             --
-├─Linear: 1-4                            [1, 512]                  819,712
-├─Linear: 1-5                            [1, 100]                  51,300
-├─Linear: 1-6                            [1, 1]                    513
+├─Conv2d: 1-1                            [1, 32, 10, 10]           2,048
+├─Conv2d: 1-2                            [1, 32, 10, 10]           9,248
+├─MaxPool2d: 1-3                         [1, 32, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  410,112
+├─Linear: 1-5                            [1, 1]                    513
+├─Linear: 1-6                            [1, 100]                  51,300
+├─Conv2d: 1-7                            [1, 32, 10, 10]           9,536
+├─Conv2d: 1-8                            [1, 1, 10, 10]            289
 ==========================================================================================
-Total params: 912,549
-Trainable params: 912,549
+Total params: 483,046
+Trainable params: 483,046
 Non-trainable params: 0
-Total mult-adds (M): 4.97
+Total mult-adds (M): 2.57
 ==========================================================================================
 Input size (MB): 0.00
-Forward/backward pass size (MB): 0.11
-Params size (MB): 3.65
-Estimated Total Size (MB): 3.76
+Forward/backward pass size (MB): 0.08
+Params size (MB): 1.93
+Estimated Total Size (MB): 2.02
 ==========================================================================================
-Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2025-12-31 22:35:45.056497
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-01 00:19:13.763411
