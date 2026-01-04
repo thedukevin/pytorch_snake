@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 from datetime import datetime
+import random
+import sys
 
 np.random.seed(42)
 torch.manual_seed(42)
@@ -20,16 +22,18 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device " + str(device))
 
 boardSize = 10
-maxTime = 20
+maxTime = 200
 discountRate = 0.99
-GAEparam = 0.95
+GAEparam = 1
+PPOeps = 0.1
 
 # Network params
 value_coef = 0.5
 entropy_coef = 0.01
 learning_rate = 1e-03
+batchSize = 10000
 
-
+environment_name = "Snake"
 
 dir = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
@@ -148,55 +152,64 @@ class Environment:
 # print(env.makeAction(14))
 # print(env)
 
-class CNN(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(7, 64, 3, padding=1)
-        self.conv2 = nn.Conv2d(64, 64, 3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(64 * 5 * 5, 512)
-        self.policy = nn.Linear(512, 100)
-        self.value = nn.Linear(512, 1)
-    
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.relu(self.conv2(x))
-        x = self.pool(x)
-        x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        return self.policy(x), self.value(x)
-
 # class CNN(nn.Module):
 #     def __init__(self):
 #         super().__init__()
-#         self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
-#         self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+#         self.conv1 = nn.Conv2d(7, 64, 3, padding=1)
+#         self.conv2 = nn.Conv2d(64, 64, 3, padding=1)
 #         self.pool = nn.MaxPool2d(2, 2)
-#         self.fc1 = nn.Linear(32 * 5 * 5, 512)
-#         self.fc2 = nn.Linear(512, 200)
+#         self.fc1 = nn.Linear(64 * 5 * 5, 512)
+#         self.policy = nn.Linear(512, 100)
 #         self.value = nn.Linear(512, 1)
-
-#         self.conv3 = nn.Conv2d(34, 32, 3, padding=1)
-#         self.policy = nn.Conv2d(32, 1, 3, padding=1)
     
 #     def forward(self, x):
-#         B, _, _, _ = x.shape
 #         x = F.relu(self.conv1(x))
 #         x = F.relu(self.conv2(x))
-#         y = self.pool(x)
-#         y = torch.flatten(y, 1)
-#         y = F.relu(self.fc1(y))
-#         value = self.value(y)
-#         y = F.relu(self.fc2(y))
-#         comb = torch.cat([x, y.view(B, 2, 10, 10)], axis=1)
-#         comb = F.relu(self.conv3(comb))
-#         policy = self.policy(comb).view(B, 100)
-#         return policy, value
+#         x = self.pool(x)
+#         x = torch.flatten(x, 1)
+#         x = F.relu(self.fc1(x))
+#         return self.policy(x), self.value(x)
+
+class CNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(32 * 5 * 5, 512)
+        self.fc2 = nn.Linear(512, 500)
+        self.fc3 = nn.Linear(512, 256)
+        self.value = nn.Linear(256, 1)
+
+        self.conv3 = nn.Conv2d(37, 32, 3, padding=1)
+        self.policy = nn.Conv2d(32, 1, 3, padding=1)
+    
+    def forward(self, x):
+        B, _, _, _ = x.shape
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        y = self.pool(x)
+        y = torch.flatten(y, 1)
+        y = F.relu(self.fc1(y))
+        z = F.relu(self.fc3(y))
+        value = self.value(z)
+        y = F.relu(self.fc2(y))
+        comb = torch.cat([x, y.view(B, 5, 10, 10)], axis=1)
+        comb = F.relu(self.conv3(comb))
+        policy = self.policy(comb).view(B, 100)
+        return policy, value
 
 # m = CNN()
 # print(m(Environment().toTensor().reshape(1, 7, 10, 10)))
 
-class PolicyGradient():
+def printLineToFile(file, text):
+    if file is None:
+        print(text)
+    else:
+        with open(file, 'a') as f:
+            f.write(text + '\n')
+
+class PPO():
 
     def __init__(self):
 
@@ -208,10 +221,14 @@ class PolicyGradient():
         with open(self.gameOutput, 'w') as f:
             f.write("")
         
-        self.mainOutput = "main.txt"
+        self.mainOutput = None
+        if self.mainOutput is not None:
+            with open(self.mainOutput, 'w') as f:
+                f.write("")
+
+
         s = str(summary(self.model, input_size=(1, 7, 10, 10), verbose=0))
-        with open(self.mainOutput, 'w') as f:
-            f.write(s + '\n')
+        printLineToFile(self.mainOutput, s)
 
         self.itCount = 0
 
@@ -288,28 +305,76 @@ class PolicyGradient():
                 trajectories[i][t]['emp_val'] = emp_val
         return trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist
 
-    def updateModel(self, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
+    # def PGUpdate(self, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
+    #     self.model.train()
+    #     self.optimizer.zero_grad()
+    #     for t in range(len(active_thread_hist)):
+    #         inputs = []
+    #         emp_vals = []
+    #         advantages = []
+    #         for i in active_thread_hist[t]:
+    #             inputs.append(trajectories[i][t]['env'].toTensor())
+    #             emp_vals.append(trajectories[i][t]['emp_val'])
+    #             advantages.append(trajectories[i][t]['GAE'])
+    #         logits, value = self.model(torch.stack(inputs).to(device))
+    #         emp_vals = torch.tensor(emp_vals).to(device)
+    #         advantages = torch.tensor(advantages).to(device)
+    #         # advantage = (emp_vals - value.reshape((-1,))).detach()
+
+    #         loss = (-log_prob_hist[t] * advantages 
+    #                 + value_coef * (value_hist[t] - emp_vals) ** 2 
+    #                 - entropy_coef * dist_hist[t].entropy()).mean()
+
+    #         loss.backward()
+    #     self.optimizer.step()
+    
+    def PPOupdate(self, batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
         self.model.train()
-        self.optimizer.zero_grad()
+        identifiers = []
         for t in range(len(active_thread_hist)):
-            inputs = []
-            emp_vals = []
-            advantages = []
-            for i in active_thread_hist[t]:
-                inputs.append(trajectories[i][t]['env'].toTensor())
-                emp_vals.append(trajectories[i][t]['emp_val'])
-                advantages.append(trajectories[i][t]['GAE'])
-            logits, value = self.model(torch.stack(inputs).to(device))
-            emp_vals = torch.tensor(emp_vals).to(device)
-            advantages = torch.tensor(advantages).to(device)
-            # advantage = (emp_vals - value.reshape((-1,))).detach()
+            for index in range(len(active_thread_hist[t])):
+                identifiers.append([t, index])
+        random.shuffle(identifiers)
+        inputs = []
+        emp_vals = []
+        advantages = []
+        actions = []
+        old_logprob = []
+        for inst_id, (t, index) in enumerate(identifiers):
+            i = active_thread_hist[t][index]
+            inputs.append(trajectories[i][t]['env'].toTensor())
+            emp_vals.append(trajectories[i][t]['emp_val'])
+            advantages.append(trajectories[i][t]['GAE'])
+            a = action_hist[t][index]
+            actions.append(a)
+            old_logprob.append(torch.log(dist_hist[t].probs[index, a]).item())
+            if (inst_id % batchSize == batchSize-1 and inst_id + batchSize < len(identifiers)) or inst_id == len(identifiers)-1:
 
-            loss = (-log_prob_hist[t] * advantages 
-                    + value_coef * (value_hist[t] - emp_vals) ** 2 
-                    - entropy_coef * dist_hist[t].entropy()).mean()
+                self.optimizer.zero_grad()
+                logits, value = self.model(torch.stack(inputs).to(device))
+                emp_vals = torch.tensor(emp_vals).to(device)
+                advantages = torch.tensor(advantages).to(device)
+                actions = torch.tensor(actions).to(device)
+                old_logprob = torch.tensor(old_logprob).to(device)
 
-            loss.backward()
-        self.optimizer.step()
+                curr_dist = Categorical(logits=logits)
+
+                ratio = torch.exp(curr_dist.log_prob(actions) - old_logprob)
+                clipped = ratio.clip(max=1+PPOeps, min=1-PPOeps)
+                CLIP_loss = -torch.min(ratio * advantages, clipped * advantages)
+
+                loss = (CLIP_loss
+                         + value_coef * (value.reshape((-1,)) - emp_vals) ** 2 
+                         - entropy_coef * curr_dist.entropy()).mean()
+                loss.backward()
+                self.optimizer.step()
+
+                inputs = []
+                emp_vals = []
+                advantages = []
+                actions = []
+                old_logprob = []
+
 
     def trainLoop(self, n_iter, n_threads, evalPeriod, include_accuracy=False):
 
@@ -321,12 +386,13 @@ class PolicyGradient():
         winHist = []
         lossHist = []
 
-        with open(self.mainOutput, 'a') as f:
-            f.write("Starting training, Previous iterations: " + str(self.itCount) + " Current iterations: " + str(n_iter) + " Timestamp: " + str(datetime.now()) + '\n')
+        printLineToFile(self.mainOutput, "Starting training, Previous iterations: " + str(self.itCount) + " Current iterations: " + str(n_iter) + " Timestamp: " + str(datetime.now()))
+        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxTime: {maxTime}, discountRate: {discountRate}, GAEParam: {GAEparam}')
+        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, batchSize: {batchSize}, numThreads: {n_threads}')
 
         for it in range(n_iter):
             trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist = self.generateTrajectories(n_threads)
-            self.updateModel(trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist)
+            self.PPOupdate(batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist)
 
             # Evaluation
 
@@ -352,8 +418,9 @@ class PolicyGradient():
                 elapsed_time = traj[-1]['env'].time
                 times.append(elapsed_time)
 
-                wins.append((traj[-1]['env'].body == -1).sum() == 1)
-                losses.append(len(traj[-1]['env'].validDirs()) == 0)
+                win = (traj[-1]['env'].body == -1).sum() == 1
+                wins.append(win)
+                losses.append((len(traj[-1]['env'].validDirs()) == 0) and not win)
             
             if include_accuracy:
                 acc = []
@@ -376,16 +443,15 @@ class PolicyGradient():
 
             self.itCount += 1
             if self.itCount % evalPeriod == 0:
-                with open(self.mainOutput, 'a') as f:
-                    f.write("Iteration: " + str(self.itCount) + 
-                        " Score: " + str(np.array(scoreHist[-evalPeriod:]).mean()) +
-                        " Size: " + str(np.array(sizeHist[-evalPeriod:]).mean()) +
-                        " Game Length: " + str(np.array(lengthsHist[-evalPeriod:]).mean()) + 
-                        " Elapsed Time: " + str(np.array(timesHist[-evalPeriod:]).mean()) + 
-                        " Wins: " + str(np.array(winHist[-evalPeriod:]).mean()) + 
-                        " Losses: " + str(np.array(lossHist[-evalPeriod:]).mean()) + 
-                        (" Accuracy: " + str(np.array(accuracyHist[-evalPeriod:]).mean()) if include_accuracy else "") + 
-                        " Timestamp: " + str(datetime.now()) + '\n')
+                printLineToFile(self.mainOutput, "Iteration: " + str(self.itCount) + 
+                            " Score: " + str(np.array(scoreHist[-evalPeriod:]).mean()) +
+                            " Size: " + str(np.array(sizeHist[-evalPeriod:]).mean()) +
+                            " Game Length: " + str(np.array(lengthsHist[-evalPeriod:]).mean()) + 
+                            " Elapsed Time: " + str(np.array(timesHist[-evalPeriod:]).mean()) + 
+                            " Wins: " + str(np.array(winHist[-evalPeriod:]).mean()) + 
+                            " Losses: " + str(np.array(lossHist[-evalPeriod:]).mean()) + 
+                            (" Accuracy: " + str(np.array(accuracyHist[-evalPeriod:]).mean()) if include_accuracy else "") + 
+                            " Timestamp: " + str(datetime.now()))
 
                 with open(self.gameOutput, 'a') as f:
                     s = "----------------------------- Iteration " + str(self.itCount) + ' -----------------------------\n'
@@ -413,10 +479,10 @@ class PolicyGradient():
 mode = "WRITE"
 
 if mode == 'WRITE':
-    pg = PolicyGradient()
+    ppo = PPO()
 else:
     assert mode == 'READ'
     with open('snake.pkl', 'rb') as file:
-        pg = pickle.load(file)
+        ppo = pickle.load(file)
 
-pg.trainLoop(2000, 32, 100)
+ppo.trainLoop(2000, 32, 100)

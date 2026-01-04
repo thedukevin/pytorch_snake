@@ -1,0 +1,250 @@
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 4]                    --
+├─Conv2d: 1-1                            [1, 8, 10, 10]            152
+├─Conv2d: 1-2                            [1, 8, 10, 10]            584
+├─MaxPool2d: 1-3                         [1, 8, 5, 5]              --
+├─Linear: 1-4                            [1, 40]                   8,040
+├─Linear: 1-5                            [1, 4]                    164
+├─Linear: 1-6                            [1, 1]                    41
+==========================================================================================
+Total params: 8,981
+Trainable params: 8,981
+Non-trainable params: 0
+Total mult-adds (M): 0.08
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.01
+Params size (MB): 0.04
+Estimated Total Size (MB): 0.05
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-01 16:27:08.417249
+Iteration: 100 Score: 0.1896875 Game Length: 33.96 Timestamp: 2026-01-01 16:27:51.927147
+Iteration: 200 Score: 0.1909375 Game Length: 33.9259375 Timestamp: 2026-01-01 16:28:35.403274
+Iteration: 300 Score: 0.20875 Game Length: 34.2778125 Timestamp: 2026-01-01 16:29:29.354153
+Iteration: 400 Score: 0.22 Game Length: 32.474375 Timestamp: 2026-01-01 16:30:26.290157
+Iteration: 500 Score: 0.2528125 Game Length: 33.03 Timestamp: 2026-01-01 16:31:11.300136
+Iteration: 600 Score: 0.4540625 Game Length: 38.1021875 Timestamp: 2026-01-01 16:31:59.245680
+Iteration: 700 Score: 1.2134375 Game Length: 47.886875 Timestamp: 2026-01-01 16:32:55.316628
+Iteration: 800 Score: 2.218125 Game Length: 47.5565625 Timestamp: 2026-01-01 16:33:49.563378
+Iteration: 900 Score: 3.60625 Game Length: 55.0521875 Timestamp: 2026-01-01 16:34:51.314936
+Iteration: 1000 Score: 4.7834375 Game Length: 59.4128125 Timestamp: 2026-01-01 16:35:55.113439
+Iteration: 1100 Score: 6.1184375 Game Length: 64.1390625 Timestamp: 2026-01-01 16:37:02.817677
+Iteration: 1200 Score: 7.345 Game Length: 72.9425 Timestamp: 2026-01-01 16:38:16.381137
+Iteration: 1300 Score: 8.39375 Game Length: 76.2009375 Timestamp: 2026-01-01 16:39:30.000793
+Iteration: 1400 Score: 9.256875 Game Length: 80.0390625 Timestamp: 2026-01-01 16:40:48.096034
+Iteration: 1500 Score: 10.385 Game Length: 82.193125 Timestamp: 2026-01-01 16:42:06.507047
+Iteration: 1600 Score: 10.761875 Game Length: 83.0334375 Timestamp: 2026-01-01 16:43:25.510573
+Iteration: 1700 Score: 11.144375 Game Length: 84.1640625 Timestamp: 2026-01-01 16:44:44.811836
+Iteration: 1800 Score: 11.5421875 Game Length: 86.62625 Timestamp: 2026-01-01 16:46:15.147315
+Iteration: 1900 Score: 12.124375 Game Length: 88.60125 Timestamp: 2026-01-01 16:47:38.778731
+Iteration: 2000 Score: 12.3 Game Length: 89.5946875 Timestamp: 2026-01-01 16:49:01.676095
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 4]                    --
+├─Conv2d: 1-1                            [1, 8, 10, 10]            152
+├─Conv2d: 1-2                            [1, 8, 10, 10]            584
+├─MaxPool2d: 1-3                         [1, 8, 5, 5]              --
+├─Linear: 1-4                            [1, 40]                   8,040
+├─Dropout: 1-5                           [1, 40]                   --
+├─Linear: 1-6                            [1, 4]                    164
+├─Linear: 1-7                            [1, 1]                    41
+==========================================================================================
+Total params: 8,981
+Trainable params: 8,981
+Non-trainable params: 0
+Total mult-adds (M): 0.08
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.01
+Params size (MB): 0.04
+Estimated Total Size (MB): 0.05
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 10000 Timestamp: 2026-01-01 19:38:41.543369
+Environment: Token Collector, boardSize: 10, maxTime: 100, discountRate: 0.99, GAEParam: 0.95
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.001, numThreads: 4
+Iteration: 100 Score: 0.165 Game Length: 33.3375 Timestamp: 2026-01-01 19:38:54.943854
+Iteration: 200 Score: 0.1775 Game Length: 33.04 Timestamp: 2026-01-01 19:39:07.676315
+Iteration: 300 Score: 0.1825 Game Length: 31.445 Timestamp: 2026-01-01 19:39:20.793122
+Iteration: 400 Score: 0.195 Game Length: 34.445 Timestamp: 2026-01-01 19:39:34.461196
+Iteration: 500 Score: 0.2175 Game Length: 35.425 Timestamp: 2026-01-01 19:39:47.805112
+Iteration: 600 Score: 0.1775 Game Length: 32.3325 Timestamp: 2026-01-01 19:40:00.574498
+Iteration: 700 Score: 0.17 Game Length: 34.805 Timestamp: 2026-01-01 19:40:14.456291
+Iteration: 800 Score: 0.2275 Game Length: 33.675 Timestamp: 2026-01-01 19:40:28.648143
+Iteration: 900 Score: 0.28 Game Length: 34.99 Timestamp: 2026-01-01 19:40:42.983443
+Iteration: 1000 Score: 0.1675 Game Length: 34.9175 Timestamp: 2026-01-01 19:40:57.451408
+Iteration: 1100 Score: 0.2075 Game Length: 33.7725 Timestamp: 2026-01-01 19:41:11.406233
+Iteration: 1200 Score: 0.2575 Game Length: 33.36 Timestamp: 2026-01-01 19:41:24.891509
+Iteration: 1300 Score: 0.31 Game Length: 33.3425 Timestamp: 2026-01-01 19:41:37.893643
+Iteration: 1400 Score: 0.3175 Game Length: 33.8125 Timestamp: 2026-01-01 19:41:50.713389
+Iteration: 1500 Score: 0.4225 Game Length: 37.3 Timestamp: 2026-01-01 19:42:05.597869
+Iteration: 1600 Score: 0.5575 Game Length: 43.1475 Timestamp: 2026-01-01 19:42:23.633615
+Iteration: 1700 Score: 0.875 Game Length: 49.755 Timestamp: 2026-01-01 19:42:44.097623
+Iteration: 1800 Score: 1.105 Game Length: 52.595 Timestamp: 2026-01-01 19:43:04.662966
+Iteration: 1900 Score: 1.5 Game Length: 49.28 Timestamp: 2026-01-01 19:43:25.585393
+Iteration: 2000 Score: 1.8025 Game Length: 59.8475 Timestamp: 2026-01-01 19:43:47.760804
+Iteration: 2100 Score: 2.04 Game Length: 53.715 Timestamp: 2026-01-01 19:44:07.758730
+Iteration: 2200 Score: 2.355 Game Length: 53.705 Timestamp: 2026-01-01 19:44:29.612892
+Iteration: 2300 Score: 2.9025 Game Length: 54.345 Timestamp: 2026-01-01 19:44:52.369166
+Iteration: 2400 Score: 3.0125 Game Length: 57.4425 Timestamp: 2026-01-01 19:45:15.846743
+Iteration: 2500 Score: 3.925 Game Length: 64.585 Timestamp: 2026-01-01 19:45:40.148796
+Iteration: 2600 Score: 4.0775 Game Length: 63.57 Timestamp: 2026-01-01 19:46:04.075364
+Iteration: 2700 Score: 4.375 Game Length: 65.7225 Timestamp: 2026-01-01 19:46:28.984342
+Iteration: 2800 Score: 4.6575 Game Length: 64.4775 Timestamp: 2026-01-01 19:46:52.311945
+Iteration: 2900 Score: 5.445 Game Length: 68.025 Timestamp: 2026-01-01 19:47:15.660318
+Iteration: 3000 Score: 5.8975 Game Length: 66.1625 Timestamp: 2026-01-01 19:47:38.923912
+Iteration: 3100 Score: 6.2475 Game Length: 71.58 Timestamp: 2026-01-01 19:48:06.198378
+Iteration: 3200 Score: 6.995 Game Length: 77.2925 Timestamp: 2026-01-01 19:48:34.966995
+Iteration: 3300 Score: 7.01 Game Length: 73.725 Timestamp: 2026-01-01 19:49:00.043191
+Iteration: 3400 Score: 7.3725 Game Length: 76.625 Timestamp: 2026-01-01 19:49:25.843157
+Iteration: 3500 Score: 7.6775 Game Length: 77.3475 Timestamp: 2026-01-01 19:49:51.384602
+Iteration: 3600 Score: 7.94 Game Length: 77.8925 Timestamp: 2026-01-01 19:50:18.445123
+Iteration: 3700 Score: 7.9325 Game Length: 78.98 Timestamp: 2026-01-01 19:50:45.093899
+Iteration: 3800 Score: 8.5325 Game Length: 79.6325 Timestamp: 2026-01-01 19:51:11.522167
+Iteration: 3900 Score: 8.385 Game Length: 79.1225 Timestamp: 2026-01-01 19:51:38.319067
+Iteration: 4000 Score: 9.07 Game Length: 83.095 Timestamp: 2026-01-01 19:52:05.745922
+Iteration: 4100 Score: 9.35 Game Length: 83.15 Timestamp: 2026-01-01 19:52:31.925811
+Iteration: 4200 Score: 9.1675 Game Length: 81.3475 Timestamp: 2026-01-01 19:52:59.922926
+Iteration: 4300 Score: 9.785 Game Length: 84.1725 Timestamp: 2026-01-01 19:53:26.364637
+Iteration: 4400 Score: 10.2925 Game Length: 86.4425 Timestamp: 2026-01-01 19:53:53.515460
+Iteration: 4500 Score: 10.31 Game Length: 86.0375 Timestamp: 2026-01-01 19:54:22.742115
+Iteration: 4600 Score: 10.8525 Game Length: 87.67 Timestamp: 2026-01-01 19:54:51.946067
+Iteration: 4700 Score: 10.945 Game Length: 89.3575 Timestamp: 2026-01-01 19:55:20.995353
+Iteration: 4800 Score: 10.88 Game Length: 89.655 Timestamp: 2026-01-01 19:55:49.003424
+Iteration: 4900 Score: 11.4425 Game Length: 90.9975 Timestamp: 2026-01-01 19:56:18.217155
+Iteration: 5000 Score: 11.4075 Game Length: 90.505 Timestamp: 2026-01-01 19:56:47.229632
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 4]                    --
+├─Conv2d: 1-1                            [1, 8, 10, 10]            152
+├─Conv2d: 1-2                            [1, 8, 10, 10]            584
+├─MaxPool2d: 1-3                         [1, 8, 5, 5]              --
+├─Linear: 1-4                            [1, 40]                   8,040
+├─Dropout: 1-5                           [1, 40]                   --
+├─Linear: 1-6                            [1, 4]                    164
+├─Linear: 1-7                            [1, 1]                    41
+==========================================================================================
+Total params: 8,981
+Trainable params: 8,981
+Non-trainable params: 0
+Total mult-adds (M): 0.08
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.01
+Params size (MB): 0.04
+Estimated Total Size (MB): 0.05
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-01 20:07:14.058350
+Environment: Token Collector, boardSize: 10, maxTime: 100, discountRate: 0.99, GAEParam: 1
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.003, numThreads: 32
+Iteration: 100 Score: 0.2071875 Game Length: 33.9659375 Timestamp: 2026-01-01 20:07:56.901411
+Iteration: 200 Score: 0.21125 Game Length: 32.7734375 Timestamp: 2026-01-01 20:08:37.812655
+Iteration: 300 Score: 0.3453125 Game Length: 32.655625 Timestamp: 2026-01-01 20:09:18.729587
+Iteration: 400 Score: 1.1921875 Game Length: 47.1409375 Timestamp: 2026-01-01 20:10:16.386573
+Iteration: 500 Score: 2.8034375 Game Length: 53.570625 Timestamp: 2026-01-01 20:11:17.795975
+Iteration: 600 Score: 6.370625 Game Length: 66.523125 Timestamp: 2026-01-01 20:12:27.855898
+Iteration: 700 Score: 9.166875 Game Length: 77.6959375 Timestamp: 2026-01-01 20:13:46.007481
+Iteration: 800 Score: 10.4840625 Game Length: 83.669375 Timestamp: 2026-01-01 20:15:05.897698
+Iteration: 900 Score: 11.6846875 Game Length: 88.711875 Timestamp: 2026-01-01 20:16:32.556883
+Iteration: 1000 Score: 12.58875 Game Length: 92.588125 Timestamp: 2026-01-01 20:17:58.384983
+Iteration: 1100 Score: 12.9528125 Game Length: 94.5134375 Timestamp: 2026-01-01 20:19:25.919573
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 4]                    --
+├─Conv2d: 1-1                            [1, 8, 10, 10]            152
+├─Conv2d: 1-2                            [1, 8, 10, 10]            584
+├─MaxPool2d: 1-3                         [1, 8, 5, 5]              --
+├─Linear: 1-4                            [1, 40]                   8,040
+├─Dropout: 1-5                           [1, 40]                   --
+├─Linear: 1-6                            [1, 4]                    164
+├─Linear: 1-7                            [1, 1]                    41
+==========================================================================================
+Total params: 8,981
+Trainable params: 8,981
+Non-trainable params: 0
+Total mult-adds (M): 0.08
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.01
+Params size (MB): 0.04
+Estimated Total Size (MB): 0.05
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-01 20:20:16.675336
+Environment: Token Collector, boardSize: 10, maxTime: 100, discountRate: 0.99, GAEParam: 0.95
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.003, numThreads: 32
+Iteration: 100 Score: 0.2015625 Game Length: 34.4178125 Timestamp: 2026-01-01 20:20:59.382551
+Iteration: 200 Score: 0.2209375 Game Length: 34.4996875 Timestamp: 2026-01-01 20:21:44.500722
+Iteration: 300 Score: 0.2503125 Game Length: 30.92 Timestamp: 2026-01-01 20:22:23.117221
+Iteration: 400 Score: 0.2790625 Game Length: 28.7878125 Timestamp: 2026-01-01 20:23:00.191343
+Iteration: 500 Score: 0.836875 Game Length: 38.12875 Timestamp: 2026-01-01 20:23:46.513381
+Iteration: 600 Score: 3.375625 Game Length: 55.82375 Timestamp: 2026-01-01 20:24:47.430069
+Iteration: 700 Score: 7.73375 Game Length: 72.5096875 Timestamp: 2026-01-01 20:26:04.264025
+Iteration: 800 Score: 10.9003125 Game Length: 84.1865625 Timestamp: 2026-01-01 20:27:30.617826
+Iteration: 900 Score: 12.1696875 Game Length: 89.6553125 Timestamp: 2026-01-01 20:29:01.815428
+Iteration: 1000 Score: 13.12375 Game Length: 93.371875 Timestamp: 2026-01-01 20:30:30.032265
+Iteration: 1100 Score: 13.42125 Game Length: 95.2971875 Timestamp: 2026-01-01 20:31:59.563102
+
+
+
+
+
+
+
+
+
+Agent gets stuck (target its own head)
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 100]                  --
+├─Conv2d: 1-1                            [1, 32, 10, 10]           2,048
+├─Conv2d: 1-2                            [1, 32, 10, 10]           9,248
+├─MaxPool2d: 1-3                         [1, 32, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  410,112
+├─Linear: 1-5                            [1, 1]                    513
+├─Linear: 1-6                            [1, 200]                  102,600
+├─Conv2d: 1-7                            [1, 32, 10, 10]           9,824
+├─Conv2d: 1-8                            [1, 1, 10, 10]            289
+==========================================================================================
+Total params: 534,634
+Trainable params: 534,634
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 2.65
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.08
+Params size (MB): 2.14
+Estimated Total Size (MB): 2.22
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-03 23:16:18.247369
+Iteration: 100 Score: 10.292438725361105 Size: 18.585 Game Length: 54.3646875 Elapsed Time: 368.375625 Wins: 0.0 Losses: 0.9815625 Timestamp: 2026-01-03 23:21:37.283337
+Iteration: 200 Score: 14.30760580560026 Size: 22.7940625 Game Length: 27.15 Elapsed Time: 193.961875 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:24:25.886271
+Iteration: 300 Score: 15.48585759124722 Size: 24.11875 Game Length: 31.529375 Elapsed Time: 229.3709375 Wins: 0.0 Losses: 0.9990625 Timestamp: 2026-01-03 23:27:39.481036
+Iteration: 400 Score: 18.64216007926616 Size: 27.2303125 Game Length: 62.594375 Elapsed Time: 294.2553125 Wins: 0.0 Losses: 0.8934375 Timestamp: 2026-01-03 23:33:08.005032
+Iteration: 500 Score: 19.697508910722416 Size: 26.9228125 Game Length: 128.8340625 Elapsed Time: 302.56125 Wins: 0.0 Losses: 0.50375 Timestamp: 2026-01-03 23:42:02.143884
+Iteration: 600 Score: 17.565145792251258 Size: 24.2703125 Game Length: 143.3246875 Elapsed Time: 247.961875 Wins: 0.0 Losses: 0.395 Timestamp: 2026-01-03 23:51:41.757208
+Iteration: 700 Score: 20.640788200795342 Size: 27.6946875 Game Length: 151.1459375 Elapsed Time: 343.92375 Wins: 0.0 Losses: 0.4134375 Timestamp: 2026-01-04 00:02:16.846446
+Iteration: 800 Score: 23.3486064204173 Size: 31.30125 Game Length: 133.8315625 Elapsed Time: 379.2290625 Wins: 0.0 Losses: 0.59625 Timestamp: 2026-01-04 00:12:01.605978
+Iteration: 900 Score: 27.21585696615439 Size: 35.5440625 Game Length: 130.2059375 Elapsed Time: 465.01125 Wins: 0.0 Losses: 0.6421875 Timestamp: 2026-01-04 00:22:04.067556
+Iteration: 1000 Score: 27.339410377627747 Size: 35.2878125 Game Length: 141.35375 Elapsed Time: 447.69875 Wins: 0.0 Losses: 0.546875 Timestamp: 2026-01-04 00:32:38.665962
+Iteration: 1100 Score: 26.48173312395418 Size: 34.3603125 Game Length: 144.7634375 Elapsed Time: 407.909375 Wins: 0.0 Losses: 0.5421875 Timestamp: 2026-01-04 00:43:15.691886
+Iteration: 1200 Score: 28.634366863981246 Size: 36.6153125 Game Length: 144.2946875 Elapsed Time: 445.7721875 Wins: 0.0 Losses: 0.5384375 Timestamp: 2026-01-04 00:53:59.676864
+Iteration: 1300 Score: 28.489409311488213 Size: 36.51375 Game Length: 141.8153125 Elapsed Time: 435.6534375 Wins: 0.0 Losses: 0.56 Timestamp: 2026-01-04 01:04:47.110894
