@@ -1,0 +1,8 @@
+Iteration 0, Abs net weight: 0.018271883949637413
+Iteration 1, Abs net weight: 0.019046958535909653
+Iteration 2, Abs net weight: 0.019880764186382294
+Iteration 3, Abs net weight: 0.020911522209644318
+Iteration 4, Abs net weight: 0.022174406796693802
+Iteration 5, Abs net weight: 0.02343595214188099
+Iteration 6, Abs net weight: 0.024588316679000854
+Iteration 7, Abs net weight: 0.025516465306282043

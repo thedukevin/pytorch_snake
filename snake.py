@@ -22,18 +22,18 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device " + str(device))
 
 boardSize = 10
-maxTime = 200
+maxTime = 400
 discountRate = 0.99
-GAEparam = 1
+GAEparam = 0.95
 PPOeps = 0.1
 
 # Network params
 value_coef = 0.5
 entropy_coef = 0.01
 learning_rate = 1e-03
-batchSize = 10000
+batchSize = 512
 
-environment_name = "Snake"
+environment_name = "Snake, rectilinear"
 
 dir = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
@@ -64,35 +64,40 @@ class Environment:
                 validDirs.append(d)
         return validDirs
 
+    def validActions(self):
+        horiz_act = torch.zeros(boardSize)
+        vert_act = torch.zeros(boardSize)
+        acts = [horiz_act, vert_act]
+        for d in range(4):
+            pos = shiftPos(self.head, d)
+            while isValid(pos):
+                if self.queryBody(pos) != -1:
+                    break
+                acts[d%2][pos[1-d%2]] = 1
+                if pos == self.apple:
+                    break
+                pos = shiftPos(pos, d)
+        return torch.cat([acts[0], acts[1]])
+
     def makeAction(self, action):
-        target = (action // boardSize, action % boardSize)
+        actionOrient = action >= boardSize
+        actionPosition = action % boardSize
+        actionDir = actionPosition < self.head[1-actionOrient]
+        actionMag = abs(actionPosition - self.head[1-actionOrient])
 
-        reward = -0.01
+        d = actionOrient + actionDir*2
+
         init_time = self.time
-        while target != self.head:
-            dirs = self.validDirs()
-            if len(dirs) == 0:
-                print(self)
-            assert len(dirs) > 0
-            minDist = 1e+10
-            action = -1
-            for d in dirs:
-                newHead = shiftPos(self.head, d)
-                newDist = abs(newHead[0] - target[0]) + abs(newHead[1] - target[1])
-                if newDist < minDist:
-                    minDist = newDist
-                    action = d
-            assert action >= 0
-            self.editBody(self.head, action)
-            self.head = shiftPos(self.head, action)
+        reward = -0.01
 
+        for i in range(actionMag):
+            self.editBody(self.head, d)
+            self.head = shiftPos(self.head, d)
             self.time += 1
 
             if self.head == self.apple:
                 if np.sum(self.body == -1) == 1:
                     return winReward, True
-                if len(self.validDirs()) == 0:
-                    return loseReward, True
                 self.randomizeApple()
                 reward = appleReward * discountRate ** (self.time - init_time)
                 break
@@ -100,10 +105,11 @@ class Environment:
                 tailDir = self.queryBody(self.tail)
                 self.editBody(self.tail, -1)
                 self.tail = shiftPos(self.tail, tailDir)
-            
-            if len(self.validDirs()) == 0:
-                return loseReward, True
-            
+
+        if np.sum(self.body == -1) == 1:
+            return winReward, True
+        if len(self.validDirs()) == 0:
+            return loseReward, True
             
         return reward, False
     
@@ -121,9 +127,9 @@ class Environment:
         arr = np.zeros((7, boardSize, boardSize))
         for i in range(4):
             arr[i][self.body == i] = 1
-        arr[4, self.head[0], self.head[1]] = 10
-        arr[5, self.tail[0], self.tail[1]] = 10
-        arr[6, self.apple[0], self.apple[1]] = 10
+        arr[4, self.head[0], self.head[1]] = 5
+        arr[5, self.tail[0], self.tail[1]] = 5
+        arr[6, self.apple[0], self.apple[1]] = 5
         return torch.tensor(arr).to(torch.float32)
 
     def __str__(self):
@@ -143,32 +149,30 @@ class Environment:
 
 # env = Environment()
 # print(env)
-# print(env.makeAction(53))
+# print(env.validActions())
+# print(env.makeAction(3))
 # print(env)
-# print(env.makeAction(81))
+# print(env.validActions())
+# print(env.makeAction(19))
 # print(env)
-# print(env.makeAction(95))
+# print(env.validActions())
+# print(env.makeAction(5))
 # print(env)
-# print(env.makeAction(14))
+# print(env.validActions())
+# print(env.makeAction(8))
 # print(env)
+# print(env.validActions())
+# print(env.makeAction(18))
+# print(env)
+# print(env.validActions())
+# print(env.makeAction(9))
+# print(env)
+# print(env.validActions())
+# print(env.makeAction(19))
+# print(env)
+# print(env.validActions())
 
-# class CNN(nn.Module):
-#     def __init__(self):
-#         super().__init__()
-#         self.conv1 = nn.Conv2d(7, 64, 3, padding=1)
-#         self.conv2 = nn.Conv2d(64, 64, 3, padding=1)
-#         self.pool = nn.MaxPool2d(2, 2)
-#         self.fc1 = nn.Linear(64 * 5 * 5, 512)
-#         self.policy = nn.Linear(512, 100)
-#         self.value = nn.Linear(512, 1)
-    
-#     def forward(self, x):
-#         x = F.relu(self.conv1(x))
-#         x = F.relu(self.conv2(x))
-#         x = self.pool(x)
-#         x = torch.flatten(x, 1)
-#         x = F.relu(self.fc1(x))
-#         return self.policy(x), self.value(x)
+
 
 class CNN(nn.Module):
     def __init__(self):
@@ -177,27 +181,45 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(32 * 5 * 5, 512)
-        self.fc2 = nn.Linear(512, 500)
-        self.fc3 = nn.Linear(512, 256)
-        self.value = nn.Linear(256, 1)
-
-        self.conv3 = nn.Conv2d(37, 32, 3, padding=1)
-        self.policy = nn.Conv2d(32, 1, 3, padding=1)
+        self.policy = nn.Linear(512, 20)
+        self.value = nn.Linear(512, 1)
     
     def forward(self, x):
-        B, _, _, _ = x.shape
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        y = self.pool(x)
-        y = torch.flatten(y, 1)
-        y = F.relu(self.fc1(y))
-        z = F.relu(self.fc3(y))
-        value = self.value(z)
-        y = F.relu(self.fc2(y))
-        comb = torch.cat([x, y.view(B, 5, 10, 10)], axis=1)
-        comb = F.relu(self.conv3(comb))
-        policy = self.policy(comb).view(B, 100)
-        return policy, value
+        x = self.pool(x)
+        x = torch.flatten(x, 1)
+        x = F.relu(self.fc1(x))
+        return self.policy(x), self.value(x)
+
+# class CNN(nn.Module):
+#     def __init__(self):
+#         super().__init__()
+#         self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
+#         self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+#         self.pool = nn.MaxPool2d(2, 2)
+#         self.fc1 = nn.Linear(32 * 5 * 5, 512)
+#         self.fc2 = nn.Linear(512, 500)
+#         self.fc3 = nn.Linear(512, 256)
+#         self.value = nn.Linear(256, 1)
+
+#         self.conv3 = nn.Conv2d(37, 32, 3, padding=1)
+#         self.policy = nn.Conv2d(32, 1, 3, padding=1)
+    
+#     def forward(self, x):
+#         B, _, _, _ = x.shape
+#         x = F.relu(self.conv1(x))
+#         x = F.relu(self.conv2(x))
+#         y = self.pool(x)
+#         y = torch.flatten(y, 1)
+#         y = F.relu(self.fc1(y))
+#         z = F.relu(self.fc3(y))
+#         value = self.value(z)
+#         y = F.relu(self.fc2(y))
+#         comb = torch.cat([x, y.view(B, 5, 10, 10)], axis=1)
+#         comb = F.relu(self.conv3(comb))
+#         policy = self.policy(comb).view(B, 100)
+#         return policy, value
 
 # m = CNN()
 # print(m(Environment().toTensor().reshape(1, 7, 10, 10)))
@@ -219,6 +241,9 @@ class PPO():
 
         self.gameOutput = "game.txt"
         with open(self.gameOutput, 'w') as f:
+            f.write("")
+        self.debugOutput = "debug.txt"
+        with open(self.debugOutput, 'w') as f:
             f.write("")
         
         self.mainOutput = None
@@ -257,9 +282,9 @@ class PPO():
                 inputs.append(trajectories[i][t]['env'].toTensor())
             logits, value = self.model(torch.stack(inputs).to(device))
 
-            # for index, i in enumerate(active_thread_hist[t]):
-            #     va = trajectories[i][t]['env'].validActions().to(device)
-            #     logits[index, :] = logits[index, :].masked_fill(va == 0, float('-inf'))
+            for index, i in enumerate(active_thread_hist[t]):
+                va = trajectories[i][t]['env'].validActions().to(device)
+                logits[index, :] = logits[index, :].masked_fill(va == 0, float('-inf'))
             
             dist = Categorical(logits=logits)
 
@@ -269,7 +294,7 @@ class PPO():
             for index, i in enumerate(active_thread_hist[t]):
                 new_env = copy.deepcopy(trajectories[i][t]['env'])
                 trajectories[i][t]['evaluation'] = value[index].item()
-                trajectories[i][t]['reward'], endState = new_env.makeAction(actions[index])
+                trajectories[i][t]['reward'], endState = new_env.makeAction(actions[index].item())
                 # print("Action: " + str(actions[index]))
                 # print("Endstate: " + str(endState))
                 if endState:
@@ -340,6 +365,7 @@ class PPO():
         advantages = []
         actions = []
         old_logprob = []
+        valid_acts = []
         for inst_id, (t, index) in enumerate(identifiers):
             i = active_thread_hist[t][index]
             inputs.append(trajectories[i][t]['env'].toTensor())
@@ -348,14 +374,19 @@ class PPO():
             a = action_hist[t][index]
             actions.append(a)
             old_logprob.append(torch.log(dist_hist[t].probs[index, a]).item())
+            valid_acts.append(trajectories[i][t]['env'].validActions())
             if (inst_id % batchSize == batchSize-1 and inst_id + batchSize < len(identifiers)) or inst_id == len(identifiers)-1:
 
                 self.optimizer.zero_grad()
                 logits, value = self.model(torch.stack(inputs).to(device))
+
                 emp_vals = torch.tensor(emp_vals).to(device)
                 advantages = torch.tensor(advantages).to(device)
                 actions = torch.tensor(actions).to(device)
                 old_logprob = torch.tensor(old_logprob).to(device)
+                valid_acts = torch.stack(valid_acts).to(device)
+
+                logits = logits.masked_fill(valid_acts == 0, float('-inf'))
 
                 curr_dist = Categorical(logits=logits)
 
@@ -374,6 +405,7 @@ class PPO():
                 advantages = []
                 actions = []
                 old_logprob = []
+                valid_acts = []
 
 
     def trainLoop(self, n_iter, n_threads, evalPeriod, include_accuracy=False):
@@ -385,12 +417,22 @@ class PPO():
         accuracyHist = []
         winHist = []
         lossHist = []
+        winTimeHist = []
 
         printLineToFile(self.mainOutput, "Starting training, Previous iterations: " + str(self.itCount) + " Current iterations: " + str(n_iter) + " Timestamp: " + str(datetime.now()))
-        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxTime: {maxTime}, discountRate: {discountRate}, GAEParam: {GAEparam}')
+        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxTime: {maxTime}, loseReward: {loseReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
         printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, batchSize: {batchSize}, numThreads: {n_threads}')
 
         for it in range(n_iter):
+            
+            with open(self.debugOutput, 'a') as f:
+                s = 0
+                c = 0
+                for param_tens in self.model.parameters():
+                    s += param_tens.abs().sum()
+                    c += len(param_tens.flatten())
+                f.write(f"Iteration {it}, Abs net weight: {s/c}\n")
+
             trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist = self.generateTrajectories(n_threads)
             self.PPOupdate(batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist)
 
@@ -402,6 +444,7 @@ class PPO():
             times = []
             wins = []
             losses = []
+            winTimes = []
 
             for traj in trajectories:
                 # size = (traj[-1]['env'].body != -1).sum() + 1
@@ -421,6 +464,9 @@ class PPO():
                 win = (traj[-1]['env'].body == -1).sum() == 1
                 wins.append(win)
                 losses.append((len(traj[-1]['env'].validDirs()) == 0) and not win)
+
+                if win:
+                    winTimes.append(elapsed_time)
             
             if include_accuracy:
                 acc = []
@@ -440,16 +486,22 @@ class PPO():
             lengthsHist.append(np.array(lengths).mean())
             winHist.append(np.array(wins).mean())
             lossHist.append(np.array(losses).mean())
+            winTimeHist.append(np.array(winTimes).sum())
 
             self.itCount += 1
             if self.itCount % evalPeriod == 0:
+                avgWinTime = "NA"
+                winRate = np.array(winHist[-evalPeriod:]).mean()
+                if winRate > 0:
+                    avgWinTime = str(np.array(winTimeHist[-evalPeriod:]).mean() / winRate / n_threads)
                 printLineToFile(self.mainOutput, "Iteration: " + str(self.itCount) + 
                             " Score: " + str(np.array(scoreHist[-evalPeriod:]).mean()) +
                             " Size: " + str(np.array(sizeHist[-evalPeriod:]).mean()) +
                             " Game Length: " + str(np.array(lengthsHist[-evalPeriod:]).mean()) + 
                             " Elapsed Time: " + str(np.array(timesHist[-evalPeriod:]).mean()) + 
-                            " Wins: " + str(np.array(winHist[-evalPeriod:]).mean()) + 
+                            " Wins: " + str(winRate) + 
                             " Losses: " + str(np.array(lossHist[-evalPeriod:]).mean()) + 
+                            " Win Time: " + avgWinTime + 
                             (" Accuracy: " + str(np.array(accuracyHist[-evalPeriod:]).mean()) if include_accuracy else "") + 
                             " Timestamp: " + str(datetime.now()))
 
@@ -474,7 +526,7 @@ class PPO():
                 
                 with open('snake.pkl', 'wb') as file:
                     pickle.dump(self, file)
-            
+
 
 mode = "WRITE"
 

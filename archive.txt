@@ -248,3 +248,147 @@ Iteration: 1000 Score: 27.339410377627747 Size: 35.2878125 Game Length: 141.3537
 Iteration: 1100 Score: 26.48173312395418 Size: 34.3603125 Game Length: 144.7634375 Elapsed Time: 407.909375 Wins: 0.0 Losses: 0.5421875 Timestamp: 2026-01-04 00:43:15.691886
 Iteration: 1200 Score: 28.634366863981246 Size: 36.6153125 Game Length: 144.2946875 Elapsed Time: 445.7721875 Wins: 0.0 Losses: 0.5384375 Timestamp: 2026-01-04 00:53:59.676864
 Iteration: 1300 Score: 28.489409311488213 Size: 36.51375 Game Length: 141.8153125 Elapsed Time: 435.6534375 Wins: 0.0 Losses: 0.56 Timestamp: 2026-01-04 01:04:47.110894
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 32, 10, 10]           2,048
+├─Conv2d: 1-2                            [1, 32, 10, 10]           9,248
+├─MaxPool2d: 1-3                         [1, 32, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  410,112
+├─Linear: 1-5                            [1, 20]                   10,260
+├─Linear: 1-6                            [1, 1]                    513
+==========================================================================================
+Total params: 432,181
+Trainable params: 432,181
+Non-trainable params: 0
+Total mult-adds (M): 1.55
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.06
+Params size (MB): 1.73
+Estimated Total Size (MB): 1.79
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-03 23:28:30.445306
+Environment: Snake, boardSize: 10, maxTime: 400, discountRate: 0.99, GAEParam: 1
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.001, batchSize: 128, numThreads: 32
+Iteration: 100 Score: 17.299581127576317 Size: 20.91375 Game Length: 124.4115625 Elapsed Time: 381.2740625 Wins: 0.0 Losses: 0.940625 Timestamp: 2026-01-03 23:32:22.709196
+Iteration: 200 Score: 22.718103442944155 Size: 25.991875 Game Length: 76.555625 Elapsed Time: 233.51625 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:34:50.413264
+Iteration: 300 Score: 25.11687569253361 Size: 28.5259375 Game Length: 83.5253125 Elapsed Time: 262.718125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:37:28.922171
+Iteration: 400 Score: 25.718023583544685 Size: 29.1840625 Game Length: 88.3965625 Elapsed Time: 267.1025 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:40:14.863239
+Iteration: 500 Score: 26.71125081176975 Size: 30.225625 Game Length: 91.145625 Elapsed Time: 274.264375 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:43:05.153837
+Iteration: 600 Score: 28.048820031080382 Size: 31.6753125 Game Length: 99.306875 Elapsed Time: 297.1903125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:46:09.233963
+Iteration: 700 Score: 29.05822198074889 Size: 32.7315625 Game Length: 102.4171875 Elapsed Time: 307.9125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:49:24.478790
+Iteration: 800 Score: 30.081479552782753 Size: 33.8296875 Game Length: 105.2228125 Elapsed Time: 324.385625 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:53:05.033257
+Iteration: 900 Score: 30.627282438918282 Size: 34.4071875 Game Length: 108.0190625 Elapsed Time: 331.659375 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:56:28.457617
+Iteration: 1000 Score: 31.1158413210932 Size: 34.9228125 Game Length: 106.798125 Elapsed Time: 335.338125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-03 23:59:47.566084
+Iteration: 1100 Score: 32.109550324649334 Size: 35.965 Game Length: 110.293125 Elapsed Time: 360.4934375 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-04 00:03:27.694779
+Iteration: 1200 Score: 32.61219129879577 Size: 36.49125 Game Length: 113.7971875 Elapsed Time: 366.5359375 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-04 00:07:15.796587
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 32, 10, 10]           2,048
+├─Conv2d: 1-2                            [1, 32, 10, 10]           9,248
+├─MaxPool2d: 1-3                         [1, 32, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  410,112
+├─Linear: 1-5                            [1, 20]                   10,260
+├─Linear: 1-6                            [1, 1]                    513
+==========================================================================================
+Total params: 432,181
+Trainable params: 432,181
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 1.55
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.06
+Params size (MB): 1.73
+Estimated Total Size (MB): 1.79
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-04 23:53:19.511823
+Environment: Snake, rectilinear, boardSize: 10, maxTime: 400, loseReward: -5, discountRate: 0.99, GAEParam: 1
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.001, batchSize: 256, numThreads: 32
+Iteration: 100 Score: 13.0375751545862 Size: 21.720625 Game Length: 179.44125 Elapsed Time: 557.20625 Wins: 0.0 Losses: 0.9121875 Timestamp: 2026-01-05 00:00:29.371374
+Iteration: 200 Score: 19.993716681999565 Size: 28.63 Game Length: 116.4909375 Elapsed Time: 343.9396875 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 00:05:13.955883
+Iteration: 300 Score: 22.265919098259683 Size: 31.026875 Game Length: 123.01125 Elapsed Time: 368.22125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 00:10:14.456592
+Iteration: 400 Score: 23.409049442055263 Size: 32.1765625 Game Length: 122.7384375 Elapsed Time: 364.3978125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 00:15:09.191375
+Iteration: 500 Score: 24.85983148497126 Size: 33.718125 Game Length: 125.4303125 Elapsed Time: 383.565 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 00:20:10.113731
+Iteration: 600 Score: 26.076784784273297 Size: 35.0228125 Game Length: 131.2553125 Elapsed Time: 397.8840625 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 00:25:25.760935
+Iteration: 700 Score: 29.45471111207589 Size: 38.645 Game Length: 151.220625 Elapsed Time: 469.2328125 Wins: 0.0 Losses: 0.9990625 Timestamp: 2026-01-05 00:31:25.717619
+Iteration: 800 Score: 31.15125748258153 Size: 40.4275 Game Length: 166.2353125 Elapsed Time: 501.7490625 Wins: 0.0 Losses: 0.9953125 Timestamp: 2026-01-05 00:38:00.777689
+Iteration: 900 Score: 32.870917182423035 Size: 42.1975 Game Length: 171.8975 Elapsed Time: 507.4890625 Wins: 0.0 Losses: 0.99 Timestamp: 2026-01-05 00:44:48.821491
+Iteration: 1000 Score: 35.90409310872676 Size: 45.3953125 Game Length: 184.0596875 Elapsed Time: 552.33 Wins: 0.0 Losses: 0.9853125 Timestamp: 2026-01-05 00:52:06.289593
+Iteration: 1100 Score: 38.117343892443635 Size: 47.675625 Game Length: 198.5509375 Elapsed Time: 595.3246875 Wins: 0.0 Losses: 0.9665625 Timestamp: 2026-01-05 00:59:55.984448
+Iteration: 1200 Score: 40.17742259281892 Size: 49.76375 Game Length: 211.095 Elapsed Time: 636.9646875 Wins: 0.0 Losses: 0.9390625 Timestamp: 2026-01-05 01:08:19.292658
+Iteration: 1300 Score: 43.33393414656117 Size: 52.8928125 Game Length: 232.5903125 Elapsed Time: 693.6375 Wins: 0.0 Losses: 0.88125 Timestamp: 2026-01-05 01:17:28.852095
+Iteration: 1400 Score: 43.98474920713196 Size: 53.468125 Game Length: 232.5490625 Elapsed Time: 699.5028125 Wins: 0.0 Losses: 0.86625 Timestamp: 2026-01-05 01:26:30.120026
+Iteration: 1500 Score: 45.341214083907474 Size: 54.796875 Game Length: 238.6221875 Elapsed Time: 713.70625 Wins: 0.0 Losses: 0.841875 Timestamp: 2026-01-05 01:35:39.133333
+Iteration: 1600 Score: 48.34532831691583 Size: 57.6871875 Game Length: 261.62125 Elapsed Time: 786.2471875 Wins: 0.0 Losses: 0.7684375 Timestamp: 2026-01-05 01:45:31.546952
+
+
+
+
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 32, 10, 10]           2,048
+├─Conv2d: 1-2                            [1, 32, 10, 10]           9,248
+├─MaxPool2d: 1-3                         [1, 32, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  410,112
+├─Linear: 1-5                            [1, 20]                   10,260
+├─Linear: 1-6                            [1, 1]                    513
+==========================================================================================
+Total params: 432,181
+Trainable params: 432,181
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 1.55
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.06
+Params size (MB): 1.73
+Estimated Total Size (MB): 1.79
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 2000 Timestamp: 2026-01-05 19:37:14.894444
+Environment: Snake, rectilinear, boardSize: 10, maxTime: 400, loseReward: -5, discountRate: 0.99, GAEParam: 0.95
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.001, batchSize: 256, numThreads: 32
+Iteration: 100 Score: 16.332636759998238 Size: 24.9825 Game Length: 142.868125 Elapsed Time: 453.62875 Wins: 0.0 Losses: 0.954375 Timestamp: 2026-01-05 19:41:53.271004
+Iteration: 200 Score: 22.40524297749412 Size: 31.0859375 Game Length: 105.1584375 Elapsed Time: 349.1925 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 19:45:18.914073
+Iteration: 300 Score: 23.99259863566907 Size: 32.7478125 Game Length: 108.4628125 Elapsed Time: 357.273125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 19:48:51.232460
+Iteration: 400 Score: 25.898207670473795 Size: 34.7815625 Game Length: 114.9275 Elapsed Time: 395.755 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 19:52:37.724613
+Iteration: 500 Score: 28.14079480770321 Size: 37.13125 Game Length: 125.925625 Elapsed Time: 422.23125 Wins: 0.0 Losses: 1.0 Timestamp: 2026-01-05 19:56:42.835421
+Iteration: 600 Score: 33.489611984826446 Size: 42.875625 Game Length: 158.6234375 Elapsed Time: 532.7940625 Wins: 0.0 Losses: 0.995625 Timestamp: 2026-01-05 20:01:57.598167
+Starting training, Previous iterations: 600 Current iterations: 1400 Timestamp: 2026-01-05 20:10:29.085122
+Environment: Snake, rectilinear, boardSize: 10, maxTime: 400, loseReward: -5, discountRate: 0.99, GAEParam: 0.95
+Value coef: 0.5, Entropy coef: 0.01, Learning rate: 0.001, batchSize: 256, numThreads: 32
+Iteration: 700 Score: 47.48423585087646 Size: 56.8028125 Game Length: 231.6528125 Elapsed Time: 792.9903125 Wins: 0.0759375 Losses: 0.7846875 Timestamp: 2026-01-05 20:18:56.930601
+Iteration: 800 Score: 58.87087832071681 Size: 67.504375 Game Length: 258.4171875 Elapsed Time: 868.620625 Wins: 0.3146875 Losses: 0.520625 Timestamp: 2026-01-05 20:28:54.973692
+Iteration: 900 Score: 63.455371372698025 Size: 72.073125 Game Length: 268.0190625 Elapsed Time: 896.7734375 Wins: 0.43875 Losses: 0.461875 Timestamp: 2026-01-05 20:38:17.140652
+Iteration: 1000 Score: 63.23774559564286 Size: 71.9128125 Game Length: 270.159375 Elapsed Time: 883.3253125 Wins: 0.39625 Losses: 0.4771875 Timestamp: 2026-01-05 20:48:06.689070
+Iteration: 1100 Score: 66.08543564379453 Size: 74.6871875 Game Length: 283.8828125 Elapsed Time: 912.1003125 Wins: 0.4090625 Losses: 0.4303125 Timestamp: 2026-01-05 20:58:36.696035
+Iteration: 1200 Score: 64.22841415589832 Size: 72.735 Game Length: 280.7365625 Elapsed Time: 880.85625 Wins: 0.3725 Losses: 0.445625 Timestamp: 2026-01-05 21:08:17.661905
+Iteration: 1300 Score: 64.30083446973482 Size: 72.8840625 Game Length: 290.9109375 Elapsed Time: 895.4609375 Wins: 0.2990625 Losses: 0.45375 Timestamp: 2026-01-05 21:18:08.759405
+Iteration: 1400 Score: 68.30541270819626 Size: 76.7821875 Game Length: 295.8225 Elapsed Time: 919.9584375 Wins: 0.435625 Losses: 0.3865625 Timestamp: 2026-01-05 21:28:40.079959
+Iteration: 1500 Score: 69.87666579974456 Size: 78.3 Game Length: 299.7409375 Elapsed Time: 932.0815625 Wins: 0.4678125 Losses: 0.360625 Timestamp: 2026-01-05 21:39:18.069914
+Iteration: 1600 Score: 68.30045142224152 Size: 76.8109375 Game Length: 293.441875 Elapsed Time: 904.213125 Wins: 0.42625 Losses: 0.400625 Timestamp: 2026-01-05 21:49:22.869983
+Iteration: 1700 Score: 69.59584600873156 Size: 78.1046875 Game Length: 295.0065625 Elapsed Time: 916.12125 Wins: 0.4803125 Losses: 0.3821875 Timestamp: 2026-01-05 21:59:24.888664
+Iteration: 1800 Score: 69.38642404940782 Size: 77.8809375 Game Length: 298.0096875 Elapsed Time: 913.2425 Wins: 0.445 Losses: 0.3884375 Timestamp: 2026-01-05 22:09:42.618006
+Iteration: 1900 Score: 69.17000673285331 Size: 77.5371875 Game Length: 303.615625 Elapsed Time: 909.25625 Wins: 0.4121875 Losses: 0.365625 Timestamp: 2026-01-05 22:20:05.392639
+Iteration: 2000 Score: 67.89817542909836 Size: 76.3771875 Game Length: 297.76 Elapsed Time: 890.373125 Wins: 0.3953125 Losses: 0.4040625 Timestamp: 2026-01-05 22:30:48.426465
