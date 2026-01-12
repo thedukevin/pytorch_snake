@@ -25,11 +25,11 @@ boardSize = 10
 maxTime = 400
 discountRate = 0.99
 GAEparam = 0.95
-PPOeps = 0.1
+PPOeps = 0.2
 
 # Network params
-value_coef = 0.5
-entropy_coef = 0.01
+value_coef = 1
+entropy_coef = 0.005
 learning_rate = 1e-03
 batchSize = 512
 
@@ -43,9 +43,9 @@ def shiftPos(pos, d):
 def isValid(pos):
     return 0 <= pos[0] < boardSize and 0 <= pos[1] < boardSize
 
-appleReward = 1
+appleReward = 0.2
 winReward = 0
-loseReward = -5
+loseReward = -1
 
 class Environment:
     def __init__(self):
@@ -282,13 +282,40 @@ class PPO():
                 inputs.append(trajectories[i][t]['env'].toTensor())
             logits, value = self.model(torch.stack(inputs).to(device))
 
+            valid_acts = []
             for index, i in enumerate(active_thread_hist[t]):
-                va = trajectories[i][t]['env'].validActions().to(device)
-                logits[index, :] = logits[index, :].masked_fill(va == 0, float('-inf'))
+                va = trajectories[i][t]['env'].validActions()
+                if va.sum() == 0:
+                    print(trajectories[i][t]['env'])
+                assert va.sum() > 0
+                valid_acts.append(va)
+            valid_acts = torch.stack(valid_acts).to(device)
+
+            logits = logits.masked_fill(valid_acts == 0, float('-inf'))
+
+            # logits[index, :] = logits[index, :].masked_fill(va == 0, float('-inf'))
             
             dist = Categorical(logits=logits)
 
             actions = dist.sample()
+
+            if not (valid_acts[torch.arange(len(actions)), actions]).all():
+                print("At least one invalid action, generation error")
+                a = (1 - valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
+                print(a)
+                error_index = torch.nonzero(a)[0, 0]
+                print(error_index)
+                print("Input:")
+                print(inputs[error_index])
+                print("Valid acts:")
+                print(valid_acts[error_index])
+                print("Acts:")
+                print(actions[error_index])
+                print("Dist: ")
+                print(dist[error_index])
+
+            assert (valid_acts[torch.arange(len(actions)), actions]).all()
+
             log_prob = dist.log_prob(actions)
             new_active_threads = copy.deepcopy(active_thread_hist[t])
             for index, i in enumerate(active_thread_hist[t]):
@@ -329,29 +356,6 @@ class PPO():
                 emp_val = trajectories[i][t]['reward'] + discountRate**time_diff * emp_val
                 trajectories[i][t]['emp_val'] = emp_val
         return trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist
-
-    # def PGUpdate(self, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
-    #     self.model.train()
-    #     self.optimizer.zero_grad()
-    #     for t in range(len(active_thread_hist)):
-    #         inputs = []
-    #         emp_vals = []
-    #         advantages = []
-    #         for i in active_thread_hist[t]:
-    #             inputs.append(trajectories[i][t]['env'].toTensor())
-    #             emp_vals.append(trajectories[i][t]['emp_val'])
-    #             advantages.append(trajectories[i][t]['GAE'])
-    #         logits, value = self.model(torch.stack(inputs).to(device))
-    #         emp_vals = torch.tensor(emp_vals).to(device)
-    #         advantages = torch.tensor(advantages).to(device)
-    #         # advantage = (emp_vals - value.reshape((-1,))).detach()
-
-    #         loss = (-log_prob_hist[t] * advantages 
-    #                 + value_coef * (value_hist[t] - emp_vals) ** 2 
-    #                 - entropy_coef * dist_hist[t].entropy()).mean()
-
-    #         loss.backward()
-    #     self.optimizer.step()
     
     def PPOupdate(self, batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
         self.model.train()
@@ -386,11 +390,35 @@ class PPO():
                 old_logprob = torch.tensor(old_logprob).to(device)
                 valid_acts = torch.stack(valid_acts).to(device)
 
+                assert (~old_logprob.isnan()).all()
+
+                advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-08)
+
+                assert (valid_acts.sum(axis=1) > 0).all()
+                assert (~logits.isnan()).all()
+
                 logits = logits.masked_fill(valid_acts == 0, float('-inf'))
 
                 curr_dist = Categorical(logits=logits)
 
-                ratio = torch.exp(curr_dist.log_prob(actions) - old_logprob)
+                if not (valid_acts[torch.arange(len(actions)), actions]).all():
+                    print("At least one invalid action, update error")
+                    a = (1 - valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
+                    print(a)
+                    error_index = torch.nonzero(a)[0, 0]
+                    print(error_index)
+                    print("Input:")
+                    print(inputs[error_index])
+                    print("Valid acts:")
+                    print(valid_acts[error_index])
+                    print("Acts:")
+                    print(actions[error_index])
+
+                assert (valid_acts[torch.arange(len(actions)), actions]).all()
+                # assert (curr_dist.probs[torch.arange(len(actions)), actions] > 0).all()
+
+                # ratio = torch.exp(curr_dist.log_prob(actions) - old_logprob)
+                ratio = curr_dist.probs[torch.arange(len(actions)), actions] / np.exp(old_logprob)
                 clipped = ratio.clip(max=1+PPOeps, min=1-PPOeps)
                 CLIP_loss = -torch.min(ratio * advantages, clipped * advantages)
 
@@ -420,8 +448,8 @@ class PPO():
         winTimeHist = []
 
         printLineToFile(self.mainOutput, "Starting training, Previous iterations: " + str(self.itCount) + " Current iterations: " + str(n_iter) + " Timestamp: " + str(datetime.now()))
-        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxTime: {maxTime}, loseReward: {loseReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
-        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, batchSize: {batchSize}, numThreads: {n_threads}')
+        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxTime: {maxTime}, appleReward: {appleReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
+        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, PPOeps: {PPOeps}, batchSize: {batchSize}, numThreads: {n_threads}')
 
         for it in range(n_iter):
             
@@ -505,23 +533,29 @@ class PPO():
                             (" Accuracy: " + str(np.array(accuracyHist[-evalPeriod:]).mean()) if include_accuracy else "") + 
                             " Timestamp: " + str(datetime.now()))
 
+                new_lr = 3e-04
+                if winRate > 0.2 and self.optimizer.param_groups[0]['lr'] > new_lr:
+                    self.optimizer = torch.optim.Adam(self.model.parameters(), lr=new_lr)
+                    printLineToFile(self.mainOutput, f"Iteration {self.itCount}: Learning rate set to {new_lr}")
+                
                 with open(self.gameOutput, 'a') as f:
                     s = "----------------------------- Iteration " + str(self.itCount) + ' -----------------------------\n'
-                    for index in range(n_threads):
-                        s += '"################ Thread ' + str(index) + ' ################\n'
-                        for t in range(len(active_thread_hist)):
-                            try:
-                                i = active_thread_hist[t].index(index)
-                            except ValueError:
-                                continue
-                            s += 'Step: ' + str(t) + '\n'
-                            s += str(trajectories[index][t]['env']) + '\n'
-                            s += 'Reward: ' + str(trajectories[index][t]['reward']) + '\n'
-                            s += 'Emp Val: ' + str(trajectories[index][t]['emp_val']) + '\n'
-                            s += 'Action: ' + str(action_hist[t][i]) + '\n'
-                            s += 'Probs: ' + str(dist_hist[t].probs[i]) + '\n'
-                            s += 'Net value: ' + str(value_hist[t][i]) + '\n'
-                            s += '\n'
+                    index = 0
+                    # for index in range(n_threads):
+                    s += '"################ Thread ' + str(index) + ' ################\n'
+                    for t in range(len(active_thread_hist)):
+                        try:
+                            i = active_thread_hist[t].index(index)
+                        except ValueError:
+                            continue
+                        s += 'Step: ' + str(t) + '\n'
+                        s += str(trajectories[index][t]['env']) + '\n'
+                        s += 'Reward: ' + str(trajectories[index][t]['reward']) + '\n'
+                        s += 'Emp Val: ' + str(trajectories[index][t]['emp_val']) + '\n'
+                        s += 'Action: ' + str(action_hist[t][i]) + '\n'
+                        s += 'Probs: ' + str(dist_hist[t].probs[i]) + '\n'
+                        s += 'Net value: ' + str(value_hist[t][i]) + '\n'
+                        s += '\n'
                     f.write(s)
                 
                 with open('snake.pkl', 'wb') as file:
@@ -537,4 +571,4 @@ else:
     with open('snake.pkl', 'rb') as file:
         ppo = pickle.load(file)
 
-ppo.trainLoop(2000, 32, 100)
+ppo.trainLoop(3000, 32, 100)
