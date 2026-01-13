@@ -25,15 +25,20 @@ boardSize = 10
 maxTime = 400
 discountRate = 0.99
 GAEparam = 0.95
-PPOeps = 0.2
+PPOeps = 0.1
 
 # Network params
+# Note that having more actions doesn't necessarily mean you use a lower entropy coef.
 value_coef = 1
-entropy_coef = 0.005
+entropy_coef = 0.01
 learning_rate = 1e-03
-batchSize = 512
+batchSize = 128
 
-environment_name = "Snake, rectilinear"
+anneal_winRate = 1
+anneal_entropy_coef = 0.005
+anneal_learning_rate = 3e-04
+
+environment_name = "Snake rectilinear remove-forced-moves"
 
 dir = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
@@ -77,7 +82,22 @@ class Environment:
                 if pos == self.apple:
                     break
                 pos = shiftPos(pos, d)
-        return torch.cat([acts[0], acts[1]])
+        return torch.cat([acts[0], acts[1]]).to(torch.bool)
+
+    def primitiveAction(self, d): # returns whether apple was acheived
+        assert d in self.validDirs()
+        self.editBody(self.head, d)
+        self.head = shiftPos(self.head, d)
+        self.time += 1
+
+        if self.head == self.apple:
+            self.randomizeApple()
+            return 1
+        else:
+            tailDir = self.queryBody(self.tail)
+            self.editBody(self.tail, -1)
+            self.tail = shiftPos(self.tail, tailDir)
+            return 0
 
     def makeAction(self, action):
         actionOrient = action >= boardSize
@@ -91,23 +111,15 @@ class Environment:
         reward = -0.01
 
         for i in range(actionMag):
-            self.editBody(self.head, d)
-            self.head = shiftPos(self.head, d)
-            self.time += 1
-
-            if self.head == self.apple:
-                if np.sum(self.body == -1) == 1:
-                    return winReward, True
-                self.randomizeApple()
-                reward = appleReward * discountRate ** (self.time - init_time)
-                break
-            else:
-                tailDir = self.queryBody(self.tail)
-                self.editBody(self.tail, -1)
-                self.tail = shiftPos(self.tail, tailDir)
+            isApple = self.primitiveAction(d)
+            reward += isApple * appleReward * discountRate ** (self.time - init_time)
+        
+        while len(self.validDirs()) == 1:
+            isApple = self.primitiveAction(self.validDirs()[0])
+            reward += isApple * appleReward * discountRate ** (self.time - init_time)
 
         if np.sum(self.body == -1) == 1:
-            return winReward, True
+            return reward + winReward, True
         if len(self.validDirs()) == 0:
             return loseReward, True
             
@@ -121,6 +133,8 @@ class Environment:
     
     def randomizeApple(self):
         openSquares = [(i, j) for i in range(boardSize) for j in range(boardSize) if self.body[i][j] == -1 and (i, j) != self.head]
+        if len(openSquares) == 0:
+            return
         self.apple = openSquares[np.random.randint(len(openSquares))]
     
     def toTensor(self):
@@ -147,32 +161,6 @@ class Environment:
             s += '\n'
         return s
 
-# env = Environment()
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(3))
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(19))
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(5))
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(8))
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(18))
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(9))
-# print(env)
-# print(env.validActions())
-# print(env.makeAction(19))
-# print(env)
-# print(env.validActions())
-
-
 
 class CNN(nn.Module):
     def __init__(self):
@@ -192,38 +180,6 @@ class CNN(nn.Module):
         x = F.relu(self.fc1(x))
         return self.policy(x), self.value(x)
 
-# class CNN(nn.Module):
-#     def __init__(self):
-#         super().__init__()
-#         self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
-#         self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
-#         self.pool = nn.MaxPool2d(2, 2)
-#         self.fc1 = nn.Linear(32 * 5 * 5, 512)
-#         self.fc2 = nn.Linear(512, 500)
-#         self.fc3 = nn.Linear(512, 256)
-#         self.value = nn.Linear(256, 1)
-
-#         self.conv3 = nn.Conv2d(37, 32, 3, padding=1)
-#         self.policy = nn.Conv2d(32, 1, 3, padding=1)
-    
-#     def forward(self, x):
-#         B, _, _, _ = x.shape
-#         x = F.relu(self.conv1(x))
-#         x = F.relu(self.conv2(x))
-#         y = self.pool(x)
-#         y = torch.flatten(y, 1)
-#         y = F.relu(self.fc1(y))
-#         z = F.relu(self.fc3(y))
-#         value = self.value(z)
-#         y = F.relu(self.fc2(y))
-#         comb = torch.cat([x, y.view(B, 5, 10, 10)], axis=1)
-#         comb = F.relu(self.conv3(comb))
-#         policy = self.policy(comb).view(B, 100)
-#         return policy, value
-
-# m = CNN()
-# print(m(Environment().toTensor().reshape(1, 7, 10, 10)))
-
 def printLineToFile(file, text):
     if file is None:
         print(text)
@@ -238,6 +194,8 @@ class PPO():
         self.model = CNN().to(device)
         
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
+        self.entropy_coef = entropy_coef
+        self.annealed = False
 
         self.gameOutput = "game.txt"
         with open(self.gameOutput, 'w') as f:
@@ -282,6 +240,8 @@ class PPO():
                 inputs.append(trajectories[i][t]['env'].toTensor())
             logits, value = self.model(torch.stack(inputs).to(device))
 
+            assert (~logits.isnan()).all()
+
             valid_acts = []
             for index, i in enumerate(active_thread_hist[t]):
                 va = trajectories[i][t]['env'].validActions()
@@ -291,7 +251,7 @@ class PPO():
                 valid_acts.append(va)
             valid_acts = torch.stack(valid_acts).to(device)
 
-            logits = logits.masked_fill(valid_acts == 0, float('-inf'))
+            logits = logits.masked_fill(~valid_acts, float('-inf'))
 
             # logits[index, :] = logits[index, :].masked_fill(va == 0, float('-inf'))
             
@@ -299,20 +259,33 @@ class PPO():
 
             actions = dist.sample()
 
-            if not (valid_acts[torch.arange(len(actions)), actions]).all():
-                print("At least one invalid action, generation error")
-                a = (1 - valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
-                print(a)
-                error_index = torch.nonzero(a)[0, 0]
-                print(error_index)
-                print("Input:")
-                print(inputs[error_index])
-                print("Valid acts:")
-                print(valid_acts[error_index])
-                print("Acts:")
-                print(actions[error_index])
-                print("Dist: ")
-                print(dist[error_index])
+            for resample_it in range(10):
+                if (valid_acts[torch.arange(len(actions)), actions]).all():
+                    break
+                print(f"At least one invalid action, generation error. Resampling {resample_it} iteration...")
+                actions = dist.sample()
+
+            # while not (valid_acts[torch.arange(len(actions)), actions]).all():
+            #     print("At least one invalid action, generation error. Resampling...")
+            #     actions = dist.sample()
+
+            # if not (valid_acts[torch.arange(len(actions)), actions]).all():
+
+            #     print("At least one invalid action, generation error")
+            #     a = (~valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
+            #     print(a)
+            #     error_index = torch.nonzero(a)[0, 0]
+            #     print(error_index)
+            #     print("Input:")
+            #     print(inputs[error_index])
+            #     print("Valid acts:")
+            #     print(valid_acts[error_index])
+            #     print("Acts:")
+            #     print(actions[error_index])
+            #     print("Logits:")
+            #     print(logits[error_index])
+            #     print("Dist: ")
+            #     print(dist.probs[error_index])
 
             assert (valid_acts[torch.arange(len(actions)), actions]).all()
 
@@ -397,13 +370,13 @@ class PPO():
                 assert (valid_acts.sum(axis=1) > 0).all()
                 assert (~logits.isnan()).all()
 
-                logits = logits.masked_fill(valid_acts == 0, float('-inf'))
+                logits = logits.masked_fill(~valid_acts, float('-inf'))
 
                 curr_dist = Categorical(logits=logits)
 
                 if not (valid_acts[torch.arange(len(actions)), actions]).all():
                     print("At least one invalid action, update error")
-                    a = (1 - valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
+                    a = (~valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
                     print(a)
                     error_index = torch.nonzero(a)[0, 0]
                     print(error_index)
@@ -424,7 +397,7 @@ class PPO():
 
                 loss = (CLIP_loss
                          + value_coef * (value.reshape((-1,)) - emp_vals) ** 2 
-                         - entropy_coef * curr_dist.entropy()).mean()
+                         - self.entropy_coef * curr_dist.entropy()).mean()
                 loss.backward()
                 self.optimizer.step()
 
@@ -533,10 +506,11 @@ class PPO():
                             (" Accuracy: " + str(np.array(accuracyHist[-evalPeriod:]).mean()) if include_accuracy else "") + 
                             " Timestamp: " + str(datetime.now()))
 
-                new_lr = 3e-04
-                if winRate > 0.2 and self.optimizer.param_groups[0]['lr'] > new_lr:
-                    self.optimizer = torch.optim.Adam(self.model.parameters(), lr=new_lr)
-                    printLineToFile(self.mainOutput, f"Iteration {self.itCount}: Learning rate set to {new_lr}")
+                if winRate > anneal_winRate and not self.annealed:
+                    self.annealed = True
+                    self.optimizer = torch.optim.Adam(self.model.parameters(), lr=anneal_learning_rate)
+                    self.entropy_coef = anneal_entropy_coef
+                    printLineToFile(self.mainOutput, f"Iteration {self.itCount}: Learning rate set to {anneal_learning_rate}. Entropy coef set to {self.entropy_coef}.")
                 
                 with open(self.gameOutput, 'a') as f:
                     s = "----------------------------- Iteration " + str(self.itCount) + ' -----------------------------\n'
