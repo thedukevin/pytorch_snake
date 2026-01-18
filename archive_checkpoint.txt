@@ -1,0 +1,682 @@
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (M): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 3000 Timestamp: 2026-01-16 19:19:15.882852
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.1, batchSize: 256, numThreads: 32
+Iteration: 200 Score: -0.5437660794636855 Game Length: 40.87796875 Elapsed Time: 299.54515625 Wins: 0.0 Losses: 0.23046875 Furthest Checkpoint: 54 Timestamp: 2026-01-16 19:21:23.012124
+     Eval score: -3.660385803453968 Eval size: 3.78125 Eval wins: 0.0 Eval losses: 0.0 Eval win time: NA
+Iteration: 400 Score: -0.360643985410301 Game Length: 43.98109375 Elapsed Time: 328.405625 Wins: 0.0 Losses: 0.15359375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:23:36.060935
+     Eval score: -3.0925114239391736 Eval size: 6.71875 Eval wins: 0.0 Eval losses: 0.0 Eval win time: NA
+Iteration: 600 Score: 0.5354012314345935 Game Length: 40.56671875 Elapsed Time: 234.56203125 Wins: 0.0925 Losses: 0.22203125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:25:33.166016
+     Eval score: 3.1194895571985826 Eval size: 34.625 Eval wins: 0.03125 Eval losses: 0.8125 Eval win time: 1742.0
+Iteration: 800 Score: 1.633597576521219 Game Length: 40.34734375 Elapsed Time: 200.6425 Wins: 0.22828125 Losses: 0.124375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:27:28.739584
+     Eval score: 6.480898308311172 Eval size: 51.4375 Eval wins: 0.21875 Eval losses: 0.71875 Eval win time: 1698.4285714285713
+Iteration: 1000 Score: 2.214144803621616 Game Length: 40.18171875 Elapsed Time: 211.920625 Wins: 0.26359375 Losses: 0.08765625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:29:27.183188
+     Eval score: 12.885821709691609 Eval size: 86.625 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1727.75
+Iteration: 1200 Score: 2.4057347293357227 Game Length: 41.06484375 Elapsed Time: 219.67828125 Wins: 0.27234375 Losses: 0.05640625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:31:24.738324
+     Eval score: 12.85396622884521 Eval size: 86.03125 Eval wins: 0.71875 Eval losses: 0.28125 Eval win time: 1697.0
+Iteration: 1400 Score: 2.4939833306711825 Game Length: 40.83484375 Elapsed Time: 220.04703125 Wins: 0.2828125 Losses: 0.05546875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:33:22.162225
+     Eval score: 12.057749791898623 Eval size: 80.375 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1598.090909090909
+Iteration: 1600 Score: 2.589097427097735 Game Length: 40.2496875 Elapsed Time: 218.10046875 Wins: 0.2953125 Losses: 0.06375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:35:18.633275
+     Eval score: 9.710159304185968 Eval size: 66.625 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1515.625
+Iteration: 1800 Score: 2.565441069935198 Game Length: 40.13390625 Elapsed Time: 215.42078125 Wins: 0.2834375 Losses: 0.07828125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:37:17.931952
+     Eval score: 12.216685753547054 Eval size: 79.71875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1477.3181818181818
+Iteration: 2000 Score: 2.574137297692793 Game Length: 39.5890625 Elapsed Time: 212.70359375 Wins: 0.28765625 Losses: 0.0915625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:39:15.089042
+     Eval score: 9.36303282999449 Eval size: 64.15625 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1523.142857142857
+Iteration: 2200 Score: 2.546458678277598 Game Length: 39.89296875 Elapsed Time: 209.04453125 Wins: 0.27765625 Losses: 0.08796875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:41:10.206044
+     Eval score: 12.22650914419517 Eval size: 79.84375 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1456.4545454545455
+Iteration: 2400 Score: 2.5865188154093626 Game Length: 39.98265625 Elapsed Time: 206.34671875 Wins: 0.27703125 Losses: 0.094375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:43:03.804961
+     Eval score: 9.838234546064847 Eval size: 66.21875 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1400.9333333333334
+Iteration: 2600 Score: 2.6579425560731544 Game Length: 39.8646875 Elapsed Time: 205.506875 Wins: 0.28875 Losses: 0.08359375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:44:59.733932
+     Eval score: 9.546869747406074 Eval size: 65.15625 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1402.8461538461538
+Iteration: 2800 Score: 2.6262350152381644 Game Length: 39.84390625 Elapsed Time: 201.5175 Wins: 0.2771875 Losses: 0.098125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:46:52.805957
+     Eval score: 11.3796465518318 Eval size: 75.0625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1380.111111111111
+Iteration: 3000 Score: 2.6722148092683375 Game Length: 40.20671875 Elapsed Time: 200.96609375 Wins: 0.28 Losses: 0.08265625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 19:48:48.394508
+     Eval score: 12.542621220540127 Eval size: 80.96875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1346.8636363636363
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 32, 10, 10]           2,048
+├─Conv2d: 1-2                            [1, 32, 10, 10]           9,248
+├─MaxPool2d: 1-3                         [1, 32, 5, 5]             --
+├─Linear: 1-4                            [1, 512]                  410,112
+├─Linear: 1-5                            [1, 20]                   10,260
+├─Linear: 1-6                            [1, 1]                    513
+==========================================================================================
+Total params: 432,181
+Trainable params: 432,181
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 1.55
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.06
+Params size (MB): 1.73
+Estimated Total Size (MB): 1.79
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 3000 Timestamp: 2026-01-17 01:39:18.601442
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.1, batchSize: 256, numThreads: 32, checkPointLimit: 90, replacementProb: 0.5
+Iteration: 200 Score: -0.41549357605878784 Game Length: 42.90609375 Elapsed Time: 315.28625 Wins: 0.0103125 Losses: 0.17625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:43:41.668735
+     Eval score: -1.8397743423462485 Eval size: 12.59375 Eval wins: 0.0 Eval losses: 0.1875 Eval win time: NA
+Iteration: 400 Score: 0.9534533704502032 Game Length: 34.27 Elapsed Time: 168.38171875 Wins: 0.20140625 Losses: 0.31328125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:47:08.742439
+     Eval score: 3.8769267019286446 Eval size: 37.3125 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 600 Score: 1.7042462021794536 Game Length: 37.5309375 Elapsed Time: 190.785 Wins: 0.24171875 Losses: 0.1965625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:50:51.317700
+     Eval score: 4.6146851699525 Eval size: 40.125 Eval wins: 0.03125 Eval losses: 0.9375 Eval win time: 1982.0
+Iteration: 800 Score: 2.06702833316624 Game Length: 37.54328125 Elapsed Time: 195.1009375 Wins: 0.26265625 Losses: 0.1884375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:54:34.930992
+     Eval score: 7.1683436964382174 Eval size: 52.21875 Eval wins: 0.25 Eval losses: 0.75 Eval win time: 1589.0
+Iteration: 1000 Score: 2.31576809542719 Game Length: 36.74703125 Elapsed Time: 192.54125 Wins: 0.295625 Losses: 0.19265625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:58:16.640934
+     Eval score: 7.484919545344014 Eval size: 53.71875 Eval wins: 0.28125 Eval losses: 0.71875 Eval win time: 1482.5555555555557
+Iteration: 1200 Score: 2.430394887020272 Game Length: 38.25859375 Elapsed Time: 200.82296875 Wins: 0.288125 Losses: 0.15484375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:02:07.547105
+     Eval score: 7.951308275930559 Eval size: 56.03125 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1457.8
+Iteration: 1400 Score: 2.46115894618108 Game Length: 37.7953125 Elapsed Time: 199.6625 Wins: 0.29015625 Losses: 0.16125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:05:55.261745
+     Eval score: 8.838455571807295 Eval size: 60.71875 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1470.0
+Iteration: 1600 Score: 2.5003041411726015 Game Length: 38.12625 Elapsed Time: 200.335 Wins: 0.293125 Losses: 0.1496875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:09:40.968218
+     Eval score: 9.059289737788749 Eval size: 62.375 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1464.25
+Iteration: 1800 Score: 2.5153435771759924 Game Length: 38.47609375 Elapsed Time: 200.18 Wins: 0.28890625 Losses: 0.14453125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:13:31.032414
+     Eval score: 8.019289488740988 Eval size: 56.4375 Eval wins: 0.28125 Eval losses: 0.71875 Eval win time: 1436.0
+Iteration: 2000 Score: 2.5465138876136946 Game Length: 38.35890625 Elapsed Time: 200.71484375 Wins: 0.2871875 Losses: 0.13640625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:17:21.117212
+     Eval score: 9.507652812797748 Eval size: 63.84375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1394.9285714285713
+Iteration: 2200 Score: 2.5025275415169057 Game Length: 38.02765625 Elapsed Time: 196.98140625 Wins: 0.28109375 Losses: 0.1565625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:21:06.313449
+     Eval score: 11.183672108631253 Eval size: 73.28125 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1380.388888888889
+Iteration: 2400 Score: 2.524851395225625 Game Length: 36.95265625 Elapsed Time: 190.56359375 Wins: 0.29328125 Losses: 0.17671875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:24:43.200656
+     Eval score: 8.111328431623633 Eval size: 55.6875 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1312.8
+Iteration: 2600 Score: 2.6115406862429245 Game Length: 38.1678125 Elapsed Time: 199.0453125 Wins: 0.291875 Losses: 0.1409375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:28:28.021531
+     Eval score: 9.126662775445837 Eval size: 61.59375 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1335.6153846153845
+Iteration: 2800 Score: 2.5209991794968856 Game Length: 37.92796875 Elapsed Time: 192.04578125 Wins: 0.2771875 Losses: 0.15875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:32:11.629874
+     Eval score: 8.704043941332875 Eval size: 59.1875 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1356.5
+Iteration: 3000 Score: 2.466599844151005 Game Length: 37.83265625 Elapsed Time: 186.34796875 Wins: 0.2771875 Losses: 0.16484375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:35:51.474503
+     Eval score: 10.254407170267124 Eval size: 68.53125 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1334.5
+    
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (M): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 6000 Timestamp: 2026-01-16 22:50:15.972788
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.05, batchSize: 256, numThreads: 32, checkPointLimit: 90, replacementProb: 0.5
+Iteration: 200 Score: -0.5248419774046316 Game Length: 41.28328125 Elapsed Time: 294.023125 Wins: 0.0 Losses: 0.2221875 Furthest Checkpoint: 77 Timestamp: 2026-01-16 22:52:28.003574
+     Eval score: -3.8158465208829306 Eval size: 2.96875 Eval wins: 0.0 Eval losses: 0.0 Eval win time: NA
+Iteration: 400 Score: -0.3286688813569603 Game Length: 41.1496875 Elapsed Time: 322.33515625 Wins: 0.0 Losses: 0.2103125 Furthest Checkpoint: 81 Timestamp: 2026-01-16 22:54:43.863775
+     Eval score: 1.2170281419768927 Eval size: 24.65625 Eval wins: 0.0 Eval losses: 0.71875 Eval win time: NA
+Iteration: 600 Score: 0.7964466132841761 Game Length: 34.620625 Elapsed Time: 199.40625 Wins: 0.16921875 Losses: 0.31796875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 22:56:27.942469
+     Eval score: 3.8737231392843854 Eval size: 38.84375 Eval wins: 0.03125 Eval losses: 0.875 Eval win time: 1852.0
+Iteration: 800 Score: 1.7406040565495886 Game Length: 39.01046875 Elapsed Time: 208.563125 Wins: 0.241875 Losses: 0.148125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 22:58:26.555412
+     Eval score: 4.183581328821342 Eval size: 37.6875 Eval wins: 0.03125 Eval losses: 0.875 Eval win time: 1647.0
+Iteration: 1000 Score: 1.9974258367297084 Game Length: 38.9565625 Elapsed Time: 201.68796875 Wins: 0.26296875 Losses: 0.141875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:00:24.284448
+     Eval score: 6.53346586130548 Eval size: 51.75 Eval wins: 0.15625 Eval losses: 0.75 Eval win time: 1734.4
+Iteration: 1200 Score: 2.1131778025942496 Game Length: 39.19203125 Elapsed Time: 206.96578125 Wins: 0.26578125 Losses: 0.1309375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:02:25.533163
+     Eval score: 6.060210461317446 Eval size: 48.3125 Eval wins: 0.09375 Eval losses: 0.78125 Eval win time: 1788.3333333333333
+Iteration: 1400 Score: 2.1585856712936646 Game Length: 38.8178125 Elapsed Time: 204.64015625 Wins: 0.26953125 Losses: 0.13875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:04:25.767423
+     Eval score: 6.290488022327722 Eval size: 49.125 Eval wins: 0.125 Eval losses: 0.75 Eval win time: 1642.25
+Iteration: 1600 Score: 2.310623373109269 Game Length: 39.37015625 Elapsed Time: 213.85109375 Wins: 0.27015625 Losses: 0.11734375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:06:27.710861
+     Eval score: 6.530076014754853 Eval size: 49.8125 Eval wins: 0.21875 Eval losses: 0.65625 Eval win time: 1510.4285714285713
+Iteration: 1800 Score: 2.3781206215665653 Game Length: 38.95484375 Elapsed Time: 207.7196875 Wins: 0.28 Losses: 0.12375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:08:22.516131
+     Eval score: 9.126382555904213 Eval size: 62.9375 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1526.5384615384614
+Iteration: 2000 Score: 2.4559339325377043 Game Length: 38.69546875 Elapsed Time: 206.941875 Wins: 0.2909375 Losses: 0.12203125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:10:19.424995
+     Eval score: 8.553839088638153 Eval size: 59.71875 Eval wins: 0.34375 Eval losses: 0.625 Eval win time: 1544.0
+Iteration: 2200 Score: 2.437089179605899 Game Length: 38.75859375 Elapsed Time: 206.21734375 Wins: 0.28359375 Losses: 0.12390625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:12:18.350813
+     Eval score: 7.000409215357404 Eval size: 51.125 Eval wins: 0.1875 Eval losses: 0.78125 Eval win time: 1560.5
+Iteration: 2400 Score: 2.449466845626448 Game Length: 38.4115625 Elapsed Time: 200.3240625 Wins: 0.2796875 Losses: 0.136875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:14:21.541429
+     Eval score: 9.938742860981582 Eval size: 66.46875 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1382.3125
+Iteration: 2600 Score: 2.5630711709585254 Game Length: 38.5259375 Elapsed Time: 200.325 Wins: 0.291875 Losses: 0.12703125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:16:25.107793
+     Eval score: 9.704136377396903 Eval size: 65.5 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1396.142857142857
+Iteration: 2800 Score: 2.5443939114156993 Game Length: 38.5971875 Elapsed Time: 194.7984375 Wins: 0.29015625 Losses: 0.1271875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:18:28.593826
+     Eval score: 8.500443512482857 Eval size: 58.625 Eval wins: 0.34375 Eval losses: 0.65625 Eval win time: 1378.090909090909
+Iteration: 3000 Score: 2.61842961357565 Game Length: 39.223125 Elapsed Time: 199.3559375 Wins: 0.27859375 Losses: 0.11515625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:20:32.570411
+     Eval score: 10.076874550653583 Eval size: 66.4375 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1303.6875
+Iteration: 3200 Score: 2.633435314680101 Game Length: 39.21140625 Elapsed Time: 196.04921875 Wins: 0.2834375 Losses: 0.10953125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:22:37.505000
+     Eval score: 11.291774540019773 Eval size: 74.125 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1274.235294117647
+Iteration: 3400 Score: 2.590131235043558 Game Length: 38.76453125 Elapsed Time: 190.866875 Wins: 0.27640625 Losses: 0.12828125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:24:42.203373
+     Eval score: 9.945090847777134 Eval size: 66.25 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1245.2142857142858
+Iteration: 3600 Score: 2.6559662571119294 Game Length: 38.8209375 Elapsed Time: 193.86671875 Wins: 0.28796875 Losses: 0.1159375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:26:45.280953
+     Eval score: 8.71056201013527 Eval size: 59.21875 Eval wins: 0.34375 Eval losses: 0.65625 Eval win time: 1255.0
+Iteration: 3800 Score: 2.591242582216262 Game Length: 38.46875 Elapsed Time: 187.36546875 Wins: 0.2784375 Losses: 0.138125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:28:45.369198
+     Eval score: 9.951083701940789 Eval size: 66.28125 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1267.9285714285713
+Iteration: 4000 Score: 2.598407587541772 Game Length: 38.5746875 Elapsed Time: 186.29734375 Wins: 0.28234375 Losses: 0.12671875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:30:49.528989
+     Eval score: 10.842477885882696 Eval size: 71.25 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1225.75
+Iteration: 4200 Score: 2.617529501771571 Game Length: 38.96046875 Elapsed Time: 187.3021875 Wins: 0.2728125 Losses: 0.1278125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:32:53.735220
+     Eval score: 10.470226831455852 Eval size: 68.59375 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1213.0
+Iteration: 4400 Score: 2.736600522086013 Game Length: 39.92390625 Elapsed Time: 193.21625 Wins: 0.27453125 Losses: 0.10265625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:35:00.723562
+     Eval score: 12.240346828279614 Eval size: 78.59375 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1229.095238095238
+Iteration: 4600 Score: 2.656257782382529 Game Length: 39.3821875 Elapsed Time: 184.5190625 Wins: 0.27421875 Losses: 0.1159375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:37:03.633830
+     Eval score: 10.373420631719851 Eval size: 68.5625 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1224.2666666666667
+Iteration: 4800 Score: 2.6117539246928896 Game Length: 39.52 Elapsed Time: 183.51515625 Wins: 0.25671875 Losses: 0.12125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:39:06.304118
+     Eval score: 10.260512139198443 Eval size: 67.875 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1214.4285714285713
+Iteration: 5000 Score: 2.690451950078325 Game Length: 39.6878125 Elapsed Time: 186.0909375 Wins: 0.26921875 Losses: 0.10984375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:41:11.862457
+     Eval score: 9.47152680941807 Eval size: 63.46875 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1174.75
+Iteration: 5200 Score: 2.631861433010576 Game Length: 38.97734375 Elapsed Time: 180.5028125 Wins: 0.26796875 Losses: 0.133125 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:43:13.712216
+     Eval score: 7.563872328356785 Eval size: 52.96875 Eval wins: 0.21875 Eval losses: 0.78125 Eval win time: 1167.0
+Iteration: 5400 Score: 2.7174926751817954 Game Length: 39.30890625 Elapsed Time: 184.03375 Wins: 0.2771875 Losses: 0.11359375 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:45:18.181582
+     Eval score: 11.529224352919757 Eval size: 74.5 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1181.111111111111
+Iteration: 5600 Score: 2.6686176852817813 Game Length: 39.7784375 Elapsed Time: 181.483125 Wins: 0.2621875 Losses: 0.1190625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:47:21.392221
+     Eval score: 11.136929703090917 Eval size: 72.3125 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1174.8823529411766
+Iteration: 5800 Score: 2.65687247676077 Game Length: 39.5484375 Elapsed Time: 180.3984375 Wins: 0.27078125 Losses: 0.1165625 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:49:16.374360
+     Eval score: 12.134929078414384 Eval size: 78.125 Eval wins: 0.59375 Eval losses: 0.40625 Eval win time: 1137.8947368421052
+Iteration: 6000 Score: 2.632474518396447 Game Length: 39.46421875 Elapsed Time: 177.48 Wins: 0.26234375 Losses: 0.12421875 Furthest Checkpoint: 97 Timestamp: 2026-01-16 23:51:25.929528
+     Eval score: 9.840217795058095 Eval size: 65.5625 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1141.2307692307693
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (M): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 6000 Timestamp: 2026-01-17 01:18:01.195640
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.1, batchSize: 256, numThreads: 32, checkPointLimit: 90, transitionDecay: 0.99, replacementProb: 0.05
+Iteration: 200 Score: 0.19766052352230068 Game Length: 45.2040625 Elapsed Time: 246.3365625 Wins: 0.0 Losses: 0.19109375 Furthest Checkpoint: 52 Timestamp: 2026-01-17 01:20:14.244926
+     Eval score: 3.090715055615263 Eval size: 31.21875 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 400 Score: 0.4119067436685762 Game Length: 36.20328125 Elapsed Time: 151.34125 Wins: 0.00046875 Losses: 0.4853125 Furthest Checkpoint: 94 Timestamp: 2026-01-17 01:22:00.947420
+     Eval score: 3.7460352804773893 Eval size: 34.15625 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 600 Score: 0.6511178965343605 Game Length: 34.8140625 Elapsed Time: 153.94734375 Wins: 0.0728125 Losses: 0.46328125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:23:42.322942
+     Eval score: 4.722854719949865 Eval size: 42.59375 Eval wins: 0.0 Eval losses: 0.96875 Eval win time: NA
+Iteration: 800 Score: 1.4277532215128212 Game Length: 39.22796875 Elapsed Time: 189.32046875 Wins: 0.1459375 Losses: 0.25140625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:25:34.646592
+     Eval score: 3.3167547740810406 Eval size: 30.8125 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 1000 Score: 1.9072415913738052 Game Length: 40.7340625 Elapsed Time: 205.9309375 Wins: 0.17578125 Losses: 0.17953125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:27:38.405530
+     Eval score: 4.647158083215064 Eval size: 37.625 Eval wins: 0.09375 Eval losses: 0.90625 Eval win time: 1448.3333333333333
+Iteration: 1200 Score: 2.0709608419080294 Game Length: 40.79734375 Elapsed Time: 206.62484375 Wins: 0.18203125 Losses: 0.16875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:29:36.261060
+     Eval score: 11.826238218326655 Eval size: 77.8125 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1488.6666666666667
+Iteration: 1400 Score: 2.178996582856953 Game Length: 41.62375 Elapsed Time: 209.639375 Wins: 0.186875 Losses: 0.13296875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:31:35.987068
+     Eval score: 7.634378055050932 Eval size: 54.6875 Eval wins: 0.25 Eval losses: 0.75 Eval win time: 1409.5
+Iteration: 1600 Score: 2.213362781430387 Game Length: 41.07125 Elapsed Time: 206.25421875 Wins: 0.19546875 Losses: 0.1459375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:33:39.387637
+     Eval score: 11.929799783012523 Eval size: 78.125 Eval wins: 0.65625 Eval losses: 0.3125 Eval win time: 1418.142857142857
+Iteration: 1800 Score: 2.259987424005355 Game Length: 41.15859375 Elapsed Time: 203.0796875 Wins: 0.1940625 Losses: 0.14453125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:35:38.395323
+     Eval score: 8.16590197507376 Eval size: 56.96875 Eval wins: 0.28125 Eval losses: 0.71875 Eval win time: 1346.111111111111
+Iteration: 2000 Score: 2.372916236906324 Game Length: 41.43609375 Elapsed Time: 205.50734375 Wins: 0.2071875 Losses: 0.12609375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:37:37.195685
+     Eval score: 10.785933212750939 Eval size: 71.0625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1373.7777777777778
+Iteration: 2200 Score: 2.399350719766866 Game Length: 41.125 Elapsed Time: 201.6365625 Wins: 0.205625 Losses: 0.13203125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:39:36.580489
+     Eval score: 9.843056650537939 Eval size: 66.0625 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1259.4285714285713
+Iteration: 2400 Score: 2.42122629704729 Game Length: 41.27578125 Elapsed Time: 199.77609375 Wins: 0.20734375 Losses: 0.1271875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:41:36.755125
+     Eval score: 10.629740482006422 Eval size: 70.4375 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1258.0
+Iteration: 2600 Score: 2.413999823889896 Game Length: 41.24546875 Elapsed Time: 196.495 Wins: 0.20625 Losses: 0.1303125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:43:39.258932
+     Eval score: 7.788712797266666 Eval size: 53.78125 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1228.7
+Iteration: 2800 Score: 2.4087321824797967 Game Length: 41.15953125 Elapsed Time: 193.5003125 Wins: 0.210625 Losses: 0.12703125 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:45:37.589324
+     Eval score: 10.36862640963283 Eval size: 68.78125 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1294.4666666666667
+Iteration: 3000 Score: 2.3365217177462734 Game Length: 40.86375 Elapsed Time: 187.11 Wins: 0.19984375 Losses: 0.14109375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:47:34.710713
+     Eval score: 12.00574921749761 Eval size: 77.46875 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1271.2
+Iteration: 3200 Score: 2.4250495186474357 Game Length: 40.88390625 Elapsed Time: 189.35796875 Wins: 0.215 Losses: 0.12640625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:49:37.115371
+     Eval score: 9.467637513121598 Eval size: 63.09375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1217.7857142857142
+Iteration: 3400 Score: 2.4917049105393856 Game Length: 41.2940625 Elapsed Time: 189.553125 Wins: 0.2184375 Losses: 0.11265625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:51:40.456798
+     Eval score: 11.923445130671936 Eval size: 76.59375 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1187.4
+Iteration: 3600 Score: 2.3926146018863585 Game Length: 41.32234375 Elapsed Time: 185.49515625 Wins: 0.1996875 Losses: 0.12546875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:53:42.884207
+     Eval score: 11.648196205137426 Eval size: 75.65625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1188.9444444444443
+Iteration: 3800 Score: 2.445340241693344 Game Length: 41.23609375 Elapsed Time: 186.1815625 Wins: 0.2059375 Losses: 0.129375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:55:45.802847
+     Eval score: 10.641273199562775 Eval size: 70.90625 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1232.642857142857
+Iteration: 4000 Score: 2.446067074064581 Game Length: 40.8346875 Elapsed Time: 184.14328125 Wins: 0.21765625 Losses: 0.1271875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:57:48.087743
+     Eval score: 12.330902986761885 Eval size: 79.59375 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1215.2
+Iteration: 4200 Score: 2.4005909885663077 Game Length: 41.1671875 Elapsed Time: 183.62546875 Wins: 0.20171875 Losses: 0.130625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 01:59:52.174706
+     Eval score: 10.023760410222401 Eval size: 66.34375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1136.5714285714287
+Iteration: 4400 Score: 2.410005147149907 Game Length: 41.353125 Elapsed Time: 182.7159375 Wins: 0.2053125 Losses: 0.12625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:01:57.608812
+     Eval score: 10.235972408406823 Eval size: 68.25 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1198.4615384615386
+Iteration: 4600 Score: 2.4765008690365593 Game Length: 41.75890625 Elapsed Time: 187.77796875 Wins: 0.2046875 Losses: 0.1071875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:04:01.824414
+     Eval score: 10.699326947971564 Eval size: 70.40625 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1152.2142857142858
+Iteration: 4800 Score: 2.4582476908603867 Game Length: 41.05828125 Elapsed Time: 182.50984375 Wins: 0.21984375 Losses: 0.116875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:06:04.293512
+     Eval score: 11.314577859291411 Eval size: 73.9375 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1185.8823529411766
+Iteration: 5000 Score: 2.4825643693076227 Game Length: 41.35671875 Elapsed Time: 185.77234375 Wins: 0.21109375 Losses: 0.11375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:08:07.274598
+     Eval score: 12.01732706701242 Eval size: 78.0625 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1192.8235294117646
+Iteration: 5200 Score: 2.482942600234241 Game Length: 41.23375 Elapsed Time: 184.53625 Wins: 0.21296875 Losses: 0.116875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:10:10.638962
+     Eval score: 10.471778905731762 Eval size: 69.40625 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1189.7857142857142
+Iteration: 5400 Score: 2.4302645176493103 Game Length: 41.21390625 Elapsed Time: 179.3603125 Wins: 0.21078125 Losses: 0.1240625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:12:14.183725
+     Eval score: 12.811080513171092 Eval size: 82.90625 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1166.2
+Iteration: 5600 Score: 2.4978749763723624 Game Length: 41.40609375 Elapsed Time: 182.93953125 Wins: 0.218125 Losses: 0.11421875 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:14:19.644988
+     Eval score: 8.641375451955636 Eval size: 59.375 Eval wins: 0.25 Eval losses: 0.75 Eval win time: 1121.875
+Iteration: 5800 Score: 2.5403861306711666 Game Length: 41.4971875 Elapsed Time: 184.85625 Wins: 0.21453125 Losses: 0.10359375 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:16:24.609540
+     Eval score: 13.02686186788517 Eval size: 83.25 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1144.45
+Iteration: 6000 Score: 2.58358089051061 Game Length: 41.7234375 Elapsed Time: 187.5153125 Wins: 0.21890625 Losses: 0.10390625 Furthest Checkpoint: 97 Timestamp: 2026-01-17 02:18:32.419899
+     Eval score: 10.760911642507843 Eval size: 71.28125 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1131.1538461538462
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (M): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 10000 Timestamp: 2026-01-17 02:42:37.138134
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.1, batchSize: 256, numThreads: 32, checkPointLimit: 90, transitionDecay: 0.99, replacementProb: 0.05
+Iteration: 500 Score: 0.3819188968782298 Game Length: 40.2125 Elapsed Time: 194.1219375 Wins: 0.00425 Losses: 0.3589375 Furthest Checkpoint: 97 Progress: 0.03677988446932638 Timestamp: 2026-01-17 02:47:27.330242
+     Eval score: 3.9737522337828564 Eval size: 36.4375 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 1000 Score: 1.7431281166820918 Game Length: 40.3141875 Elapsed Time: 200.2585625 Wins: 0.163 Losses: 0.209 Furthest Checkpoint: 97 Progress: 0.06197096475424917 Timestamp: 2026-01-17 02:52:18.802325
+     Eval score: 8.915942475057701 Eval size: 62.0625 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1509.1538461538462
+Iteration: 1500 Score: 2.227463601737587 Game Length: 41.5873125 Elapsed Time: 210.7039375 Wins: 0.1923125 Losses: 0.130875 Furthest Checkpoint: 97 Progress: 0.06937497696192776 Timestamp: 2026-01-17 03:13:51.636662
+     Eval score: 10.85805821592763 Eval size: 72.0625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1386.888888888889
+Iteration: 2000 Score: 2.3276108327242846 Game Length: 41.4865625 Elapsed Time: 204.1705 Wins: 0.194 Losses: 0.1305625 Furthest Checkpoint: 97 Progress: 0.07413093947700096 Timestamp: 2026-01-17 03:19:24.415118
+     Eval score: 11.213551803702305 Eval size: 74.03125 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1303.0555555555557
+Iteration: 2500 Score: 2.3792688371490875 Game Length: 41.235375 Elapsed Time: 195.6709375 Wins: 0.2070625 Losses: 0.12675 Furthest Checkpoint: 97 Progress: 0.07840151557975901 Timestamp: 2026-01-17 03:25:23.700766
+     Eval score: 9.411044284843035 Eval size: 62.90625 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1200.7692307692307
+Iteration: 3000 Score: 2.4017257448771794 Game Length: 40.9118125 Elapsed Time: 190.3054375 Wins: 0.2089375 Losses: 0.1315625 Furthest Checkpoint: 97 Progress: 0.0812070081314152 Timestamp: 2026-01-17 03:31:32.737545
+     Eval score: 12.325404931917657 Eval size: 80.09375 Eval wins: 0.59375 Eval losses: 0.40625 Eval win time: 1250.578947368421
+Iteration: 3500 Score: 2.5004438636810598 Game Length: 41.670625 Elapsed Time: 195.0488125 Wins: 0.20775 Losses: 0.1070625 Furthest Checkpoint: 97 Progress: 0.08136388405237151 Timestamp: 2026-01-17 03:38:06.375996
+     Eval score: 11.690484923317662 Eval size: 75.90625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1218.388888888889
+Iteration: 4000 Score: 2.545593063704807 Game Length: 41.3954375 Elapsed Time: 192.96075 Wins: 0.218875 Losses: 0.1041875 Furthest Checkpoint: 97 Progress: 0.08331795554589581 Timestamp: 2026-01-17 03:44:41.422369
+     Eval score: 11.125909307420525 Eval size: 73.09375 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1158.6666666666667
+Iteration: 4500 Score: 2.540051093852832 Game Length: 41.4034375 Elapsed Time: 191.091875 Wins: 0.2141875 Losses: 0.1113125 Furthest Checkpoint: 97 Progress: 0.08412541995809966 Timestamp: 2026-01-17 03:51:24.894931
+     Eval score: 9.83581915721711 Eval size: 66.34375 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1166.6
+Iteration: 5000 Score: 2.4558751637108425 Game Length: 41.3629375 Elapsed Time: 185.899125 Wins: 0.20575 Losses: 0.1233125 Furthest Checkpoint: 97 Progress: 0.08432309990014153 Timestamp: 2026-01-17 03:58:04.215656
+     Eval score: 11.177474746010615 Eval size: 73.03125 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1153.4705882352941
+Iteration: 5500 Score: 2.5086826060261833 Game Length: 41.522 Elapsed Time: 183.919125 Wins: 0.2124375 Losses: 0.112 Furthest Checkpoint: 97 Progress: 0.08645321769240635 Timestamp: 2026-01-17 04:04:50.058574
+     Eval score: 12.443205354326494 Eval size: 80.375 Eval wins: 0.59375 Eval losses: 0.40625 Eval win time: 1174.3684210526317
+Iteration: 6000 Score: 2.5048197537049837 Game Length: 41.49725 Elapsed Time: 183.346 Wins: 0.210375 Losses: 0.1105625 Furthest Checkpoint: 97 Progress: 0.08650628881606678 Timestamp: 2026-01-17 04:27:04.694667
+     Eval score: 10.517201210215617 Eval size: 69.59375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1164.2857142857142
+Iteration: 6500 Score: 2.519647041288072 Game Length: 41.529375 Elapsed Time: 183.7169375 Wins: 0.21075 Losses: 0.1060625 Furthest Checkpoint: 97 Progress: 0.08665477615274905 Timestamp: 2026-01-17 06:22:01.217035
+     Eval score: 10.878557912103474 Eval size: 72.4375 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1113.4615384615386
+Iteration: 7000 Score: 2.485584041827537 Game Length: 41.389 Elapsed Time: 180.554 Wins: 0.2095 Losses: 0.1125 Furthest Checkpoint: 97 Progress: 0.08734970177208894 Timestamp: 2026-01-17 08:16:06.610040
+     Eval score: 11.50638341946449 Eval size: 75.0 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1134.8823529411766
+Iteration: 7500 Score: 2.5344856531678763 Game Length: 41.534125 Elapsed Time: 183.8231875 Wins: 0.2094375 Losses: 0.1075 Furthest Checkpoint: 97 Progress: 0.08709961155547413 Timestamp: 2026-01-17 09:38:41.219289
+     Eval score: 13.410255616716853 Eval size: 85.0 Eval wins: 0.71875 Eval losses: 0.28125 Eval win time: 1127.9130434782608
+Iteration: 8000 Score: 2.5763928398749014 Game Length: 41.4581875 Elapsed Time: 184.46075 Wins: 0.2185 Losses: 0.1006875 Furthest Checkpoint: 97 Progress: 0.0877645358177865 Timestamp: 2026-01-17 09:44:03.715793
+     Eval score: 12.221253250372662 Eval size: 79.125 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1138.611111111111
+Iteration: 8500 Score: 2.4815377720477843 Game Length: 41.4941875 Elapsed Time: 178.1140625 Wins: 0.2066875 Losses: 0.1104375 Furthest Checkpoint: 97 Progress: 0.08827892018980225 Timestamp: 2026-01-17 09:49:24.961606
+     Eval score: 10.55033477386322 Eval size: 69.625 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1068.7692307692307
+Iteration: 9000 Score: 2.5136627952610153 Game Length: 41.5915625 Elapsed Time: 180.009 Wins: 0.2109375 Losses: 0.1005 Furthest Checkpoint: 97 Progress: 0.08808172311141696 Timestamp: 2026-01-17 09:54:47.506633
+     Eval score: 11.3797200033273 Eval size: 75.09375 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1167.3333333333333
+Iteration: 9500 Score: 2.4958818864270587 Game Length: 41.814125 Elapsed Time: 178.83375 Wins: 0.2076875 Losses: 0.0925 Furthest Checkpoint: 97 Progress: 0.08788860125841572 Timestamp: 2026-01-17 10:00:14.141655
+     Eval score: 11.014227784331194 Eval size: 72.5625 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1175.0625
+Iteration: 10000 Score: 2.5883226644254926 Game Length: 41.632125 Elapsed Time: 181.7123125 Wins: 0.2215625 Losses: 0.091125 Furthest Checkpoint: 97 Progress: 0.08920976905560334 Timestamp: 2026-01-17 10:05:34.866229
+     Eval score: 11.572037626882178 Eval size: 75.96875 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1083.8461538461538
+
+
+
+
+
+
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 15000 Timestamp: 2026-01-17 20:48:33.892742
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.2, batchSize: 256, numThreads: 32, transitionDecay: 0.95, checkpointLimit: 90, numReplacements: 50
+Iteration: 500 Score: 0.19198333728733918 Game Length: 45.148125 Elapsed Time: 288.441625 Wins: 0.0 Losses: 0.175 Furthest Checkpoint: 55 Progress: 0.01814326594526338 Timestamp: 2026-01-17 20:57:48.455837
+     Eval score: 4.191503023676611 Eval size: 38.59375 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 1000 Score: 1.1330950081407383 Game Length: 39.417125 Elapsed Time: 198.4783125 Wins: 0.09675 Losses: 0.2780625 Furthest Checkpoint: 97 Progress: 0.047770290147791 Timestamp: 2026-01-17 21:05:53.273161
+     Eval score: 10.527151981975647 Eval size: 71.71875 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1621.888888888889
+Iteration: 1500 Score: 2.1021937809855316 Game Length: 41.921375 Elapsed Time: 216.128125 Wins: 0.1785625 Losses: 0.128125 Furthest Checkpoint: 97 Progress: 0.06468617002855218 Timestamp: 2026-01-17 21:14:36.630502
+     Eval score: 9.73860987797704 Eval size: 66.59375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1459.857142857143
+Iteration: 2000 Score: 2.2647653002115127 Game Length: 41.921625 Elapsed Time: 213.6985625 Wins: 0.195 Losses: 0.1128125 Furthest Checkpoint: 97 Progress: 0.06909833399245371 Timestamp: 2026-01-17 21:23:07.328353
+     Eval score: 11.95897678651919 Eval size: 78.5625 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1408.15
+Iteration: 2500 Score: 2.3929654287689397 Game Length: 41.823625 Elapsed Time: 213.4538125 Wins: 0.2055 Losses: 0.104625 Furthest Checkpoint: 97 Progress: 0.07213026110110701 Timestamp: 2026-01-17 21:31:34.516984
+     Eval score: 11.886921468220393 Eval size: 77.65625 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1410.0
+Iteration: 3000 Score: 2.4363211750223295 Game Length: 41.7229375 Elapsed Time: 210.027375 Wins: 0.205375 Losses: 0.1086875 Furthest Checkpoint: 97 Progress: 0.07431521767460288 Timestamp: 2026-01-17 21:40:03.638477
+     Eval score: 9.382850073230287 Eval size: 64.3125 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1312.923076923077
+Iteration: 3500 Score: 2.4780119445943023 Game Length: 41.20475 Elapsed Time: 202.6628125 Wins: 0.2159375 Losses: 0.1153125 Furthest Checkpoint: 97 Progress: 0.07813137947908791 Timestamp: 2026-01-17 21:48:27.044521
+     Eval score: 8.683893276126577 Eval size: 59.625 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1290.4
+Iteration: 4000 Score: 2.5034681471651314 Game Length: 41.1548125 Elapsed Time: 200.667125 Wins: 0.214125 Losses: 0.1159375 Furthest Checkpoint: 97 Progress: 0.07952340160915086 Timestamp: 2026-01-17 21:56:48.891734
+     Eval score: 7.231290464714274 Eval size: 51.96875 Eval wins: 0.1875 Eval losses: 0.8125 Eval win time: 1238.6666666666667
+Iteration: 4500 Score: 2.4502463657167888 Game Length: 41.224125 Elapsed Time: 194.260625 Wins: 0.2095 Losses: 0.11925 Furthest Checkpoint: 97 Progress: 0.08068120015264492 Timestamp: 2026-01-17 22:05:03.084843
+     Eval score: 12.153377036374147 Eval size: 79.03125 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1184.2222222222222
+Iteration: 5000 Score: 2.500798238460567 Game Length: 41.27375 Elapsed Time: 193.5489375 Wins: 0.21825 Losses: 0.1114375 Furthest Checkpoint: 97 Progress: 0.08210965969453243 Timestamp: 2026-01-17 22:13:19.303420
+     Eval score: 10.981613181612357 Eval size: 72.21875 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1212.0
+Iteration: 5500 Score: 2.4997275883003796 Game Length: 41.3326875 Elapsed Time: 191.51875 Wins: 0.21625 Losses: 0.1068125 Furthest Checkpoint: 97 Progress: 0.08272831313919232 Timestamp: 2026-01-17 22:21:35.113171
+     Eval score: 11.422629241095894 Eval size: 74.21875 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1176.4705882352941
+Iteration: 6000 Score: 2.499678248300637 Game Length: 41.391875 Elapsed Time: 190.2513125 Wins: 0.21375 Losses: 0.1075 Furthest Checkpoint: 97 Progress: 0.08332603431444596 Timestamp: 2026-01-17 22:29:51.154029
+     Eval score: 10.654624957024456 Eval size: 70.90625 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1232.5833333333333
+Iteration: 6500 Score: 2.5198260116113795 Game Length: 41.5111875 Elapsed Time: 189.127875 Wins: 0.21225 Losses: 0.107125 Furthest Checkpoint: 97 Progress: 0.0844064907407991 Timestamp: 2026-01-17 22:38:07.569302
+     Eval score: 11.747054120137072 Eval size: 76.40625 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1214.0588235294117
+Iteration: 7000 Score: 2.550499596073021 Game Length: 41.3575625 Elapsed Time: 188.76025 Wins: 0.2193125 Losses: 0.1026875 Furthest Checkpoint: 97 Progress: 0.08517044484818738 Timestamp: 2026-01-17 22:46:24.141641
+     Eval score: 10.659725755822016 Eval size: 70.0625 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1155.0
+Iteration: 7500 Score: 2.558987361446456 Game Length: 41.5775 Elapsed Time: 190.083375 Wins: 0.21225 Losses: 0.10625 Furthest Checkpoint: 97 Progress: 0.08500898866050288 Timestamp: 2026-01-17 22:54:39.997415
+     Eval score: 12.75579545528213 Eval size: 81.28125 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1174.8636363636363
+Iteration: 8000 Score: 2.531111207512262 Game Length: 41.65725 Elapsed Time: 188.842875 Wins: 0.2095625 Losses: 0.1045625 Furthest Checkpoint: 97 Progress: 0.08471142585189377 Timestamp: 2026-01-17 23:02:54.231570
+     Eval score: 11.53476876764974 Eval size: 75.0 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1116.9375
+Iteration: 8500 Score: 2.4705060783845347 Game Length: 41.21625 Elapsed Time: 182.628 Wins: 0.2113125 Losses: 0.112875 Furthest Checkpoint: 97 Progress: 0.08598863052375924 Timestamp: 2026-01-17 23:11:02.679527
+     Eval score: 12.928811837775271 Eval size: 82.1875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1165.0454545454545
+Iteration: 9000 Score: 2.601603860212064 Game Length: 41.79875 Elapsed Time: 188.11075 Wins: 0.218 Losses: 0.0923125 Furthest Checkpoint: 97 Progress: 0.08670326146175998 Timestamp: 2026-01-17 23:19:22.235269
+     Eval score: 11.078541588263151 Eval size: 72.40625 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1078.8
+Iteration: 9500 Score: 2.530575633587383 Game Length: 41.4353125 Elapsed Time: 185.04525 Wins: 0.2148125 Losses: 0.1041875 Furthest Checkpoint: 97 Progress: 0.08643171092852556 Timestamp: 2026-01-17 23:27:35.681697
+     Eval score: 8.95870786081636 Eval size: 60.78125 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1102.0
+
+
+
+    
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (M): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 15000 Timestamp: 2026-01-17 15:49:45.757943
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.1, batchSize: 256, numThreads: 32, transitionDecay: 0.95, checkpointLimit: 90, numReplacements: 50
+Iteration: 500 Score: -0.11519220097749475 Game Length: 40.3349375 Elapsed Time: 266.1565625 Wins: 0.018375 Losses: 0.30225 Furthest Checkpoint: 97 Progress: 0.01749149432719403 Timestamp: 2026-01-17 15:54:38.603720
+     Eval score: 2.801734231569748 Eval size: 27.46875 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 1000 Score: 1.5692529410014766 Game Length: 37.7594375 Elapsed Time: 191.2000625 Wins: 0.1699375 Losses: 0.294375 Furthest Checkpoint: 97 Progress: 0.06154886612425841 Timestamp: 2026-01-17 15:59:06.072027
+     Eval score: 6.371574957624814 Eval size: 47.875 Eval wins: 0.15625 Eval losses: 0.84375 Eval win time: 1450.2
+Iteration: 1500 Score: 2.338274277562722 Game Length: 40.1361875 Elapsed Time: 218.5480625 Wins: 0.2300625 Losses: 0.1594375 Furthest Checkpoint: 97 Progress: 0.07022649802239005 Timestamp: 2026-01-17 16:03:52.979997
+     Eval score: 9.54637247848164 Eval size: 65.1875 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1426.2
+Iteration: 2000 Score: 2.490586867002525 Game Length: 40.6476875 Elapsed Time: 216.1870625 Wins: 0.242 Losses: 0.13 Furthest Checkpoint: 97 Progress: 0.07395555786793612 Timestamp: 2026-01-17 16:08:48.534422
+     Eval score: 10.138497614816798 Eval size: 68.1875 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1380.0625
+Iteration: 2500 Score: 2.576391733534312 Game Length: 40.978 Elapsed Time: 215.238125 Wins: 0.2453125 Losses: 0.1104375 Furthest Checkpoint: 97 Progress: 0.07590488547234257 Timestamp: 2026-01-17 16:13:43.973095
+     Eval score: 9.882855672506935 Eval size: 65.875 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1286.9285714285713
+Iteration: 3000 Score: 2.6150623892817566 Game Length: 40.8493125 Elapsed Time: 211.1288125 Wins: 0.2508125 Losses: 0.112375 Furthest Checkpoint: 97 Progress: 0.07831883678988476 Timestamp: 2026-01-17 16:18:31.143116
+     Eval score: 12.477296045350194 Eval size: 79.9375 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1291.9545454545455
+Iteration: 3500 Score: 2.613248122621079 Game Length: 40.3758125 Elapsed Time: 206.1955625 Wins: 0.258375 Losses: 0.117625 Furthest Checkpoint: 97 Progress: 0.0801633461075534 Timestamp: 2026-01-17 16:23:12.306042
+     Eval score: 10.624446690758454 Eval size: 69.75 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1270.2941176470588
+Iteration: 4000 Score: 2.664249350047302 Game Length: 40.6804375 Elapsed Time: 204.4395625 Wins: 0.262375 Losses: 0.100875 Furthest Checkpoint: 97 Progress: 0.08175716669653135 Timestamp: 2026-01-17 16:27:55.879969
+     Eval score: 8.275527710843097 Eval size: 56.71875 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1202.8
+Iteration: 4500 Score: 2.624979593568504 Game Length: 40.6205 Elapsed Time: 199.006875 Wins: 0.2564375 Losses: 0.109125 Furthest Checkpoint: 97 Progress: 0.08299506657605574 Timestamp: 2026-01-17 16:32:38.655269
+     Eval score: 13.916333433740252 Eval size: 88.1875 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1224.7916666666667
+Iteration: 5000 Score: 2.5619221602273994 Game Length: 40.335125 Elapsed Time: 192.6268125 Wins: 0.2586875 Losses: 0.10625 Furthest Checkpoint: 97 Progress: 0.08382867600970095 Timestamp: 2026-01-17 16:37:21.986688
+     Eval score: 9.238367089067943 Eval size: 62.65625 Eval wins: 0.34375 Eval losses: 0.65625 Eval win time: 1213.0
+Iteration: 5500 Score: 2.6469276160751307 Game Length: 40.5623125 Elapsed Time: 193.336375 Wins: 0.264125 Losses: 0.1005 Furthest Checkpoint: 97 Progress: 0.08574446608161909 Timestamp: 2026-01-17 16:42:22.748877
+     Eval score: 6.726773462619638 Eval size: 47.71875 Eval wins: 0.1875 Eval losses: 0.8125 Eval win time: 1076.6666666666667
+Iteration: 6000 Score: 2.6350153555598492 Game Length: 40.9198125 Elapsed Time: 192.7755625 Wins: 0.251625 Losses: 0.098375 Furthest Checkpoint: 97 Progress: 0.08556136546044697 Timestamp: 2026-01-17 16:47:08.597257
+     Eval score: 11.580356165981483 Eval size: 75.09375 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1153.1176470588234
+Iteration: 6500 Score: 2.639997031281954 Game Length: 40.52575 Elapsed Time: 189.29625 Wins: 0.261875 Losses: 0.1006875 Furthest Checkpoint: 97 Progress: 0.08726978026132924 Timestamp: 2026-01-17 16:51:51.157025
+     Eval score: 10.984206865408309 Eval size: 71.21875 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1152.1176470588234
+Iteration: 7000 Score: 2.609846832405083 Game Length: 40.592625 Elapsed Time: 188.6381875 Wins: 0.2568125 Losses: 0.1029375 Furthest Checkpoint: 97 Progress: 0.08682265204989903 Timestamp: 2026-01-17 16:56:41.889034
+     Eval score: 10.529684142111542 Eval size: 69.4375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1097.0
+Iteration: 7500 Score: 2.633429308008172 Game Length: 40.7418125 Elapsed Time: 186.85775 Wins: 0.2583125 Losses: 0.0974375 Furthest Checkpoint: 97 Progress: 0.08811685357770234 Timestamp: 2026-01-17 17:01:20.842714
+     Eval score: 13.115555188720538 Eval size: 83.28125 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1156.090909090909
+Iteration: 8000 Score: 2.6420552333357663 Game Length: 40.798375 Elapsed Time: 188.0845625 Wins: 0.2535625 Losses: 0.09825 Furthest Checkpoint: 97 Progress: 0.08783308363886488 Timestamp: 2026-01-17 17:06:02.354387
+     Eval score: 13.780784381906285 Eval size: 87.21875 Eval wins: 0.71875 Eval losses: 0.28125 Eval win time: 1151.0434782608695
+Iteration: 8500 Score: 2.6069764460219442 Game Length: 40.9723125 Elapsed Time: 185.53125 Wins: 0.2528125 Losses: 0.0969375 Furthest Checkpoint: 97 Progress: 0.08801784916005993 Timestamp: 2026-01-17 17:10:43.031468
+     Eval score: 12.468841857998413 Eval size: 80.09375 Eval wins: 0.59375 Eval losses: 0.40625 Eval win time: 1145.5263157894738
+Iteration: 9000 Score: 2.585476938144816 Game Length: 40.9065625 Elapsed Time: 182.966 Wins: 0.2529375 Losses: 0.1000625 Furthest Checkpoint: 97 Progress: 0.08868029824003233 Timestamp: 2026-01-17 17:15:22.647048
+     Eval score: 11.919876135724667 Eval size: 77.40625 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1134.764705882353
+Iteration: 9500 Score: 2.5591015107713657 Game Length: 40.845875 Elapsed Time: 179.5010625 Wins: 0.251375 Losses: 0.0935625 Furthest Checkpoint: 97 Progress: 0.08931102735073505 Timestamp: 2026-01-17 17:20:00.956094
+     Eval score: 13.30803079945631 Eval size: 84.71875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1122.8636363636363
+Iteration: 10000 Score: 2.512857786712694 Game Length: 40.779625 Elapsed Time: 176.78775 Wins: 0.244 Losses: 0.1056875 Furthest Checkpoint: 97 Progress: 0.08959446227321365 Timestamp: 2026-01-17 17:24:36.727966
+     Eval score: 13.148501203769836 Eval size: 83.875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1126.7272727272727
+Iteration: 10500 Score: 2.5794382300169016 Game Length: 41.236 Elapsed Time: 180.79675 Wins: 0.2468125 Losses: 0.0925625 Furthest Checkpoint: 97 Progress: 0.08938045441538091 Timestamp: 2026-01-17 17:29:20.227524
+     Eval score: 11.088567280461277 Eval size: 72.90625 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1132.4666666666667
+Iteration: 11000 Score: 2.5642946176522434 Game Length: 40.964875 Elapsed Time: 179.4655 Wins: 0.2459375 Losses: 0.093875 Furthest Checkpoint: 97 Progress: 0.08949580408536076 Timestamp: 2026-01-17 17:34:17.224392
+     Eval score: 12.312334459084298 Eval size: 79.9375 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1134.6470588235295
+Iteration: 11500 Score: 2.5606067090007127 Game Length: 41.0980625 Elapsed Time: 179.673125 Wins: 0.24125 Losses: 0.097 Furthest Checkpoint: 97 Progress: 0.08938029814843776 Timestamp: 2026-01-17 17:39:04.195511
+     Eval score: 13.326063239749141 Eval size: 84.1875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1104.8181818181818
+Iteration: 12000 Score: 2.596224467401855 Game Length: 40.554 Elapsed Time: 179.732125 Wins: 0.257 Losses: 0.0929375 Furthest Checkpoint: 97 Progress: 0.09024728580728746 Timestamp: 2026-01-17 17:43:44.307454
+     Eval score: 12.638409495673589 Eval size: 81.65625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1132.611111111111
+Iteration: 12500 Score: 2.5685829585936055 Game Length: 41.036375 Elapsed Time: 178.8863125 Wins: 0.2496875 Losses: 0.0885625 Furthest Checkpoint: 97 Progress: 0.08987150930982082 Timestamp: 2026-01-17 17:48:26.501511
+     Eval score: 12.520009330967351 Eval size: 79.90625 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1085.7142857142858
+Iteration: 13000 Score: 2.5380859646245417 Game Length: 41.3189375 Elapsed Time: 177.502375 Wins: 0.23775 Losses: 0.0939375 Furthest Checkpoint: 97 Progress: 0.08983925376762565 Timestamp: 2026-01-17 17:53:10.029692
+     Eval score: 12.172181856173943 Eval size: 78.625 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1092.0
+Iteration: 13500 Score: 2.5774325590667395 Game Length: 41.33725 Elapsed Time: 179.6361875 Wins: 0.24725 Losses: 0.080875 Furthest Checkpoint: 97 Progress: 0.08948348795361546 Timestamp: 2026-01-17 17:58:02.712019
+     Eval score: 13.472752693294584 Eval size: 85.3125 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1106.0
+Iteration: 14000 Score: 2.6010012325547667 Game Length: 41.3644375 Elapsed Time: 180.346 Wins: 0.2475625 Losses: 0.0780625 Furthest Checkpoint: 97 Progress: 0.08973083072493589 Timestamp: 2026-01-17 18:02:50.824045
+     Eval score: 13.157273922177907 Eval size: 83.4375 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1088.0454545454545
+Iteration: 14500 Score: 2.579530508482745 Game Length: 41.1915625 Elapsed Time: 178.4051875 Wins: 0.249375 Losses: 0.080375 Furthest Checkpoint: 97 Progress: 0.09012264406453963 Timestamp: 2026-01-17 18:07:36.587554
+     Eval score: 13.597286393856132 Eval size: 86.40625 Eval wins: 0.71875 Eval losses: 0.28125 Eval win time: 1144.9565217391305
+Iteration: 15000 Score: 2.5641255793822904 Game Length: 41.316125 Elapsed Time: 178.451625 Wins: 0.2444375 Losses: 0.0825 Furthest Checkpoint: 97 Progress: 0.08987645470839009 Timestamp: 2026-01-17 18:12:21.983149
+     Eval score: 11.331027139636992 Eval size: 74.34375 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1131.5
+
+
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 10000 Timestamp: 2026-01-17 23:58:59.043463
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.01, Learning rate: 0.001, PPOeps: 0.1, batchSize: 256, numThreads: 32, transitionDecay: 0.95, checkpointSetback: 5, numReplacements: 50
+Iteration: 500 Score: 0.6630184087701557 Game Length: 41.908125 Elapsed Time: 189.735 Wins: 0.0 Losses: 0.3233125 Furthest Checkpoint: 59 Progress: 0.04426668749719262 Timestamp: 2026-01-18 00:07:28.743709
+     Eval score: 3.5128269062660347 Eval size: 31.40625 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 1000 Score: 0.940302546148637 Game Length: 36.18675 Elapsed Time: 164.671125 Wins: 0.048 Losses: 0.4660625 Furthest Checkpoint: 97 Progress: 0.05627759762209977 Timestamp: 2026-01-18 00:14:52.240647
+     Eval score: 5.689850096106068 Eval size: 43.5 Eval wins: 0.125 Eval losses: 0.875 Eval win time: 1450.25
+Iteration: 1500 Score: 1.9209650386658759 Game Length: 39.992875 Elapsed Time: 198.41975 Wins: 0.1568125 Losses: 0.24175 Furthest Checkpoint: 97 Progress: 0.06795739887058438 Timestamp: 2026-01-18 00:23:05.380777
+     Eval score: 7.1757864308917085 Eval size: 51.28125 Eval wins: 0.25 Eval losses: 0.75 Eval win time: 1431.875
+Iteration: 2000 Score: 2.1732460705050545 Game Length: 40.8684375 Elapsed Time: 204.4271875 Wins: 0.1668125 Losses: 0.21175 Furthest Checkpoint: 97 Progress: 0.07191655693478487 Timestamp: 2026-01-18 00:31:24.100277
+     Eval score: 9.258845253377377 Eval size: 62.34375 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1384.7857142857142
+Iteration: 2500 Score: 2.35906664292691 Game Length: 41.8524375 Elapsed Time: 208.677875 Wins: 0.175625 Losses: 0.161625 Furthest Checkpoint: 97 Progress: 0.07395389824383945 Timestamp: 2026-01-18 00:39:53.666945
+     Eval score: 8.444659890657935 Eval size: 57.6875 Eval wins: 0.3125 Eval losses: 0.6875 Eval win time: 1263.1
+Iteration: 3000 Score: 2.3889533855979073 Game Length: 41.416875 Elapsed Time: 199.766 Wins: 0.1851875 Losses: 0.168875 Furthest Checkpoint: 97 Progress: 0.07805159966504241 Timestamp: 2026-01-18 00:48:21.826632
+     Eval score: 9.668383535365324 Eval size: 64.25 Eval wins: 0.4375 Eval losses: 0.5625 Eval win time: 1249.7857142857142
+Iteration: 3500 Score: 2.4666078747057845 Game Length: 42.1995625 Elapsed Time: 201.3538125 Wins: 0.1801875 Losses: 0.1465625 Furthest Checkpoint: 97 Progress: 0.07899656389529147 Timestamp: 2026-01-18 00:56:59.080411
+     Eval score: 9.810932311087758 Eval size: 65.5625 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1164.9166666666667
+Iteration: 4000 Score: 2.4912660538581797 Game Length: 42.113125 Elapsed Time: 198.0445625 Wins: 0.18825 Losses: 0.1399375 Furthest Checkpoint: 97 Progress: 0.08078309245846774 Timestamp: 2026-01-18 01:05:33.270891
+     Eval score: 10.644475132505853 Eval size: 70.3125 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1243.2
+Iteration: 4500 Score: 2.5359207032172226 Game Length: 42.329 Elapsed Time: 197.322125 Wins: 0.18675 Losses: 0.132375 Furthest Checkpoint: 97 Progress: 0.08212656266475413 Timestamp: 2026-01-18 01:14:05.244090
+     Eval score: 10.094347807899583 Eval size: 67.5 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1162.4166666666667
+Iteration: 5000 Score: 2.533024548620566 Game Length: 42.5551875 Elapsed Time: 193.9995625 Wins: 0.1865 Losses: 0.124 Furthest Checkpoint: 97 Progress: 0.083167722754707 Timestamp: 2026-01-18 01:22:36.638044
+     Eval score: 13.283559023902658 Eval size: 84.4375 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1169.9545454545455
+Iteration: 5500 Score: 2.5067899511390053 Game Length: 42.6433125 Elapsed Time: 189.7056875 Wins: 0.178875 Losses: 0.128875 Furthest Checkpoint: 97 Progress: 0.08443313812480206 Timestamp: 2026-01-18 01:31:06.299754
+     Eval score: 11.134399297136788 Eval size: 72.65625 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1161.8823529411766
+Iteration: 6000 Score: 2.5716851872179496 Game Length: 42.4895625 Elapsed Time: 190.2615625 Wins: 0.1928125 Losses: 0.1183125 Furthest Checkpoint: 97 Progress: 0.08570418351491338 Timestamp: 2026-01-18 01:39:33.461154
+     Eval score: 9.748175290028055 Eval size: 65.5 Eval wins: 0.34375 Eval losses: 0.65625 Eval win time: 1177.6363636363637
+Iteration: 6500 Score: 2.5397087999796657 Game Length: 42.5643125 Elapsed Time: 188.8820625 Wins: 0.18775 Losses: 0.12225 Furthest Checkpoint: 97 Progress: 0.08546682817804319 Timestamp: 2026-01-18 01:48:07.189805
+     Eval score: 10.598737961729665 Eval size: 70.125 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1180.1538461538462
+Iteration: 7000 Score: 2.5378850147976046 Game Length: 42.9388125 Elapsed Time: 186.8511875 Wins: 0.1805 Losses: 0.115375 Furthest Checkpoint: 97 Progress: 0.08625440168298595 Timestamp: 2026-01-18 01:56:40.311717
+     Eval score: 13.794922942003787 Eval size: 86.96875 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1149.5
+Iteration: 7500 Score: 2.5592854504261067 Game Length: 42.7835625 Elapsed Time: 186.2688125 Wins: 0.1829375 Losses: 0.113 Furthest Checkpoint: 97 Progress: 0.08698250265922973 Timestamp: 2026-01-18 02:05:07.327696
+     Eval score: 9.813974287367909 Eval size: 65.125 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1117.8461538461538
+Iteration: 8000 Score: 2.6113946771926777 Game Length: 43.050875 Elapsed Time: 187.604 Wins: 0.1900625 Losses: 0.100875 Furthest Checkpoint: 97 Progress: 0.08755319291033704 Timestamp: 2026-01-18 02:13:40.552012
+     Eval score: 11.237672606716913 Eval size: 73.21875 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1100.1176470588234
+Iteration: 8500 Score: 2.5349150476779347 Game Length: 42.732 Elapsed Time: 184.3630625 Wins: 0.18375 Losses: 0.1145 Furthest Checkpoint: 97 Progress: 0.08726871367320868 Timestamp: 2026-01-18 02:22:06.372473
+     Eval score: 10.120421969106715 Eval size: 67.09375 Eval wins: 0.40625 Eval losses: 0.59375 Eval win time: 1107.5384615384614
+Iteration: 9000 Score: 2.5668919527362877 Game Length: 43.2701875 Elapsed Time: 183.640125 Wins: 0.17825 Losses: 0.101125 Furthest Checkpoint: 97 Progress: 0.08813718262458523 Timestamp: 2026-01-18 02:30:40.493614
+     Eval score: 11.642858744943474 Eval size: 75.4375 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1125.4705882352941
+Iteration: 9500 Score: 2.5869245213549807 Game Length: 43.194625 Elapsed Time: 185.2834375 Wins: 0.1785 Losses: 0.1029375 Furthest Checkpoint: 97 Progress: 0.08804657385264188 Timestamp: 2026-01-18 02:39:11.824901
+     Eval score: 13.058598846378539 Eval size: 83.15625 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1095.0
+Iteration: 10000 Score: 2.571724344902467 Game Length: 43.203 Elapsed Time: 181.899125 Wins: 0.1795 Losses: 0.0990625 Furthest Checkpoint: 97 Progress: 0.08906018442404592 Timestamp: 2026-01-18 02:47:43.814150
+     Eval score: 12.822323642354622 Eval size: 81.625 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1076.6666666666667
+
+
+
+
+
+
+
+==========================================================================================
+Layer (type:depth-idx)                   Output Shape              Param #
+==========================================================================================
+CNN                                      [1, 20]                   --
+├─Conv2d: 1-1                            [1, 16, 10, 10]           1,024
+├─Conv2d: 1-2                            [1, 16, 10, 10]           2,320
+├─MaxPool2d: 1-3                         [1, 16, 5, 5]             --
+├─Linear: 1-4                            [1, 256]                  102,656
+├─Linear: 1-5                            [1, 20]                   5,140
+├─Linear: 1-6                            [1, 1]                    257
+==========================================================================================
+Total params: 111,397
+Trainable params: 111,397
+Non-trainable params: 0
+Total mult-adds (M): 0.44
+==========================================================================================
+Input size (MB): 0.00
+Forward/backward pass size (MB): 0.03
+Params size (MB): 0.45
+Estimated Total Size (MB): 0.48
+==========================================================================================
+Starting training, Previous iterations: 0 Current iterations: 10000 Timestamp: 2026-01-17 22:59:29.872773
+Environment: Snake rectilinear remove-forced-moves, boardSize: 10, maxEpisodeTime: 50, appleReward: 0.2, loseReward: -1, discountRate: 0.99, GAEParam: 0.95
+Value coef: 1, Entropy coef: 0.03, Learning rate: 0.001, PPOeps: 0.2, batchSize: 256, numThreads: 32, transitionDecay: 0.95, checkpointSetback: 5, numReplacements: 50
+Iteration: 500 Score: 0.5408994075622553 Game Length: 39.8471875 Elapsed Time: 179.3019375 Wins: 0.0 Losses: 0.3806875 Furthest Checkpoint: 69 Progress: 0.046553119972216776 Timestamp: 2026-01-17 23:04:44.164574
+     Eval score: 3.4041668157521268 Eval size: 30.21875 Eval wins: 0.0 Eval losses: 1.0 Eval win time: NA
+Iteration: 1000 Score: 1.1455752514400344 Game Length: 39.85 Elapsed Time: 168.7965 Wins: 0.059375 Losses: 0.3284375 Furthest Checkpoint: 97 Progress: 0.057631248044936655 Timestamp: 2026-01-17 23:09:52.415708
+     Eval score: 7.0045751124557745 Eval size: 52.09375 Eval wins: 0.25 Eval losses: 0.75 Eval win time: 1478.0
+Iteration: 1500 Score: 1.9585475143256967 Game Length: 43.7650625 Elapsed Time: 190.939125 Wins: 0.1331875 Losses: 0.1295625 Furthest Checkpoint: 97 Progress: 0.06922029615973127 Timestamp: 2026-01-17 23:15:33.293908
+     Eval score: 10.661645630249243 Eval size: 70.875 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1360.9444444444443
+Iteration: 2000 Score: 2.1929214945594557 Game Length: 44.2209375 Elapsed Time: 195.784375 Wins: 0.148875 Losses: 0.09975 Furthest Checkpoint: 97 Progress: 0.07311662961250297 Timestamp: 2026-01-17 23:21:17.998607
+     Eval score: 10.527920063181888 Eval size: 70.40625 Eval wins: 0.53125 Eval losses: 0.46875 Eval win time: 1271.4117647058824
+Iteration: 2500 Score: 2.2673108296419024 Game Length: 44.053 Elapsed Time: 192.5523125 Wins: 0.1545 Losses: 0.0990625 Furthest Checkpoint: 97 Progress: 0.07621330402433771 Timestamp: 2026-01-17 23:27:01.667240
+     Eval score: 9.268177975749932 Eval size: 63.625 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1228.25
+Iteration: 3000 Score: 2.2958451374455477 Game Length: 44.1390625 Elapsed Time: 188.529125 Wins: 0.156125 Losses: 0.09275 Furthest Checkpoint: 97 Progress: 0.07835346422690959 Timestamp: 2026-01-17 23:32:34.263816
+     Eval score: 12.845021792974645 Eval size: 83.40625 Eval wins: 0.71875 Eval losses: 0.28125 Eval win time: 1246.4782608695652
+Iteration: 3500 Score: 2.2268672664390587 Game Length: 44.29275 Elapsed Time: 180.14875 Wins: 0.149125 Losses: 0.095125 Furthest Checkpoint: 97 Progress: 0.07994291307987587 Timestamp: 2026-01-17 23:37:57.499383
+     Eval score: 10.629999339266906 Eval size: 70.84375 Eval wins: 0.5 Eval losses: 0.5 Eval win time: 1166.0
+Iteration: 4000 Score: 2.3403798991677722 Game Length: 44.140125 Elapsed Time: 181.7755625 Wins: 0.161 Losses: 0.0851875 Furthest Checkpoint: 97 Progress: 0.08220834356333025 Timestamp: 2026-01-17 23:43:21.361595
+     Eval score: 13.424363310929959 Eval size: 85.53125 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1176.7916666666667
+Iteration: 4500 Score: 2.3627474905883377 Game Length: 44.52125 Elapsed Time: 180.3383125 Wins: 0.1604375 Losses: 0.0741875 Furthest Checkpoint: 97 Progress: 0.08320853139215671 Timestamp: 2026-01-17 23:48:30.683361
+     Eval score: 11.44761525317875 Eval size: 75.15625 Eval wins: 0.59375 Eval losses: 0.40625 Eval win time: 1176.2105263157894
+Iteration: 5000 Score: 2.3673867024127526 Game Length: 44.59575 Elapsed Time: 179.2259375 Wins: 0.15925 Losses: 0.0734375 Furthest Checkpoint: 97 Progress: 0.08385044479014171 Timestamp: 2026-01-17 23:53:35.753882
+     Eval score: 11.83990771609777 Eval size: 77.15625 Eval wins: 0.59375 Eval losses: 0.40625 Eval win time: 1124.0526315789473
+Iteration: 5500 Score: 2.4337414111629383 Game Length: 44.3855625 Elapsed Time: 181.2700625 Wins: 0.1643125 Losses: 0.0748125 Furthest Checkpoint: 97 Progress: 0.08488823620630152 Timestamp: 2026-01-17 23:58:41.564819
+     Eval score: 9.434982684352399 Eval size: 64.125 Eval wins: 0.375 Eval losses: 0.625 Eval win time: 1131.5833333333333
+Iteration: 6000 Score: 2.396941270940572 Game Length: 44.4233125 Elapsed Time: 176.442 Wins: 0.165125 Losses: 0.071625 Furthest Checkpoint: 97 Progress: 0.08594176122883192 Timestamp: 2026-01-18 00:03:49.722559
+     Eval score: 13.833786723372167 Eval size: 87.9375 Eval wins: 0.8125 Eval losses: 0.1875 Eval win time: 1120.5384615384614
+Iteration: 6500 Score: 2.34893812562004 Game Length: 44.2961875 Elapsed Time: 171.3514375 Wins: 0.16375 Losses: 0.0765 Furthest Checkpoint: 97 Progress: 0.0870891477577932 Timestamp: 2026-01-18 00:08:51.200236
+     Eval score: 13.222890535852866 Eval size: 85.25 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1134.375
+Iteration: 7000 Score: 2.2924754709601993 Game Length: 44.765875 Elapsed Time: 168.0343125 Wins: 0.1515625 Losses: 0.0714375 Furthest Checkpoint: 97 Progress: 0.08687149787299552 Timestamp: 2026-01-18 00:13:54.922279
+     Eval score: 12.6799981598676 Eval size: 82.25 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1136.047619047619
+Iteration: 7500 Score: 2.294160977496153 Game Length: 44.689125 Elapsed Time: 167.5810625 Wins: 0.1541875 Losses: 0.07325 Furthest Checkpoint: 97 Progress: 0.08722632128328611 Timestamp: 2026-01-18 00:19:53.808034
+     Eval score: 11.072076462308797 Eval size: 74.09375 Eval wins: 0.46875 Eval losses: 0.53125 Eval win time: 1095.5333333333333
+Iteration: 8000 Score: 2.31002016837328 Game Length: 44.662875 Elapsed Time: 167.235625 Wins: 0.1566875 Losses: 0.0709375 Furthest Checkpoint: 97 Progress: 0.08787591357801965 Timestamp: 2026-01-18 00:24:57.046569
+     Eval score: 14.907843300230315 Eval size: 94.59375 Eval wins: 0.875 Eval losses: 0.125 Eval win time: 1101.642857142857
+Iteration: 8500 Score: 2.3095822476498817 Game Length: 44.9043125 Elapsed Time: 166.503375 Wins: 0.152375 Losses: 0.068625 Furthest Checkpoint: 97 Progress: 0.08811670524845099 Timestamp: 2026-01-18 00:30:15.517939
+     Eval score: 12.796540669714343 Eval size: 82.4375 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1097.6363636363637
+Iteration: 9000 Score: 2.3127112480397374 Game Length: 44.913375 Elapsed Time: 165.911875 Wins: 0.1546875 Losses: 0.0624375 Furthest Checkpoint: 97 Progress: 0.08830077537504351 Timestamp: 2026-01-18 00:35:45.844483
+     Eval score: 13.164624487169178 Eval size: 84.71875 Eval wins: 0.6875 Eval losses: 0.3125 Eval win time: 1092.2272727272727
+Iteration: 9500 Score: 2.2959286512151142 Game Length: 45.0531875 Elapsed Time: 164.5764375 Wins: 0.148875 Losses: 0.06375 Furthest Checkpoint: 97 Progress: 0.08855213768453146 Timestamp: 2026-01-18 00:41:04.213821
+     Eval score: 13.303961322966781 Eval size: 85.375 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1082.0833333333333
+Iteration: 10000 Score: 2.2638066098109566 Game Length: 45.1656875 Elapsed Time: 162.9543125 Wins: 0.136125 Losses: 0.0680625 Furthest Checkpoint: 97 Progress: 0.08853519726993701 Timestamp: 2026-01-18 00:46:10.273497
+     Eval score: 13.978064400919948 Eval size: 89.53125 Eval wins: 0.8125 Eval losses: 0.1875 Eval win time: 1083.5
+Iteration: 10500 Score: 2.351559975994127 Game Length: 45.1574375 Elapsed Time: 165.65725 Wins: 0.1505625 Losses: 0.0585625 Furthest Checkpoint: 97 Progress: 0.08955899675129518 Timestamp: 2026-01-18 01:05:33.381398
+[W NNPACK.cpp:64] Could not initialize NNPACK! Reason: Unsupported hardware.
+     Eval score: 12.840990255333946 Eval size: 82.625 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1071.3333333333333
+Iteration: 11000 Score: 2.297858722480242 Game Length: 45.1701875 Elapsed Time: 162.682625 Wins: 0.1453125 Losses: 0.06325 Furthest Checkpoint: 97 Progress: 0.08962158394042856 Timestamp: 2026-01-18 01:10:39.163846
+     Eval score: 13.480081089070659 Eval size: 86.375 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1076.7916666666667
+Iteration: 11500 Score: 2.2676164306043765 Game Length: 45.2871875 Elapsed Time: 159.9455625 Wins: 0.1360625 Losses: 0.0653125 Furthest Checkpoint: 97 Progress: 0.0901843246169509 Timestamp: 2026-01-18 01:15:34.909600
+     Eval score: 13.635606527071973 Eval size: 86.8125 Eval wins: 0.78125 Eval losses: 0.21875 Eval win time: 1081.44
+Iteration: 12000 Score: 2.2994879994763577 Game Length: 45.11925 Elapsed Time: 161.8648125 Wins: 0.1396875 Losses: 0.069 Furthest Checkpoint: 97 Progress: 0.09019473336191598 Timestamp: 2026-01-18 01:20:55.689158
+     Eval score: 12.116856889971224 Eval size: 79.53125 Eval wins: 0.5625 Eval losses: 0.4375 Eval win time: 1070.611111111111
+Iteration: 12500 Score: 2.2419001850975238 Game Length: 45.181 Elapsed Time: 155.9228125 Wins: 0.13725 Losses: 0.0674375 Furthest Checkpoint: 97 Progress: 0.09161983271224093 Timestamp: 2026-01-18 01:25:57.350937
+     Eval score: 13.852315004534722 Eval size: 89.03125 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1062.875
+Iteration: 13000 Score: 2.290241696493388 Game Length: 45.3629375 Elapsed Time: 158.4030625 Wins: 0.1400625 Losses: 0.06075 Furthest Checkpoint: 97 Progress: 0.09162048051998 Timestamp: 2026-01-18 01:31:08.741812
+     Eval score: 13.266381077749886 Eval size: 86.34375 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1059.142857142857
+Iteration: 13500 Score: 2.2317197156346986 Game Length: 45.1890625 Elapsed Time: 155.13975 Wins: 0.139875 Losses: 0.063875 Furthest Checkpoint: 97 Progress: 0.09161105845777585 Timestamp: 2026-01-18 01:37:33.980784
+     Eval score: 12.739946620221083 Eval size: 82.96875 Eval wins: 0.65625 Eval losses: 0.34375 Eval win time: 1051.952380952381
+Iteration: 14000 Score: 2.2556936184148233 Game Length: 45.38075 Elapsed Time: 155.9285 Wins: 0.1398125 Losses: 0.0606875 Furthest Checkpoint: 97 Progress: 0.09193746723475178 Timestamp: 2026-01-18 01:42:28.929233
+     Eval score: 13.340156044496926 Eval size: 86.8125 Eval wins: 0.71875 Eval losses: 0.28125 Eval win time: 1061.1739130434783
+Iteration: 14500 Score: 2.252969354112226 Game Length: 45.331 Elapsed Time: 154.3665 Wins: 0.1371875 Losses: 0.0628125 Furthest Checkpoint: 97 Progress: 0.09278069367087818 Timestamp: 2026-01-18 01:47:26.772818
+     Eval score: 12.414059608607385 Eval size: 81.15625 Eval wins: 0.625 Eval losses: 0.375 Eval win time: 1062.75
+Iteration: 15000 Score: 2.2559220398446134 Game Length: 45.6074375 Elapsed Time: 156.2659375 Wins: 0.13425 Losses: 0.0534375 Furthest Checkpoint: 97 Progress: 0.09150402748501825 Timestamp: 2026-01-18 01:52:26.488807
+     Eval score: 13.602184780539332 Eval size: 88.03125 Eval wins: 0.75 Eval losses: 0.25 Eval win time: 1071.5833333333333

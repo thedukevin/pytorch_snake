@@ -14,7 +14,9 @@ import time
 from datetime import datetime
 import random
 import sys
+from termcolor import colored
 
+random.seed(42)
 np.random.seed(42)
 torch.manual_seed(42)
 
@@ -22,17 +24,23 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device " + str(device))
 
 boardSize = 10
-maxTime = 400
+maxEpisodeTime = 50
+maxRolloutTime = 400
 discountRate = 0.99
 GAEparam = 0.95
-PPOeps = 0.1
+PPOeps = 0.2
+
+checkpointSetback = 5
+replacementProb = None
+numReplacements = 50
+transitionDecay = 0.95
 
 # Network params
 # Note that having more actions doesn't necessarily mean you use a lower entropy coef.
 value_coef = 1
-entropy_coef = 0.01
+entropy_coef = 0.03
 learning_rate = 1e-03
-batchSize = 128
+batchSize = 256
 
 anneal_winRate = 1
 anneal_entropy_coef = 0.005
@@ -113,7 +121,7 @@ class Environment:
         for i in range(actionMag):
             isApple = self.primitiveAction(d)
             reward += isApple * appleReward * discountRate ** (self.time - init_time)
-        
+                
         while len(self.validDirs()) == 1:
             isApple = self.primitiveAction(self.validDirs()[0])
             reward += isApple * appleReward * discountRate ** (self.time - init_time)
@@ -148,29 +156,41 @@ class Environment:
 
     def __str__(self):
         s = "Time: " + str(self.time) + '\n'
+        grid = []
+        for i in range(2*boardSize-1):
+            grid.append([' '] * (2*boardSize-1))
         for i in range(boardSize):
             for j in range(boardSize):
                 if (i, j) == self.head:
-                    s += 'H'
+                    grid[2*i][2*j] = 'H'
                 elif self.body[i][j] != -1:
-                    s += 'O'
+                    d = self.body[i][j]
+                    grid[2*i][2*j] = 'O'
+                    grid[2*i + dir[d][0]][2*j + dir[d][1]] = '-' if d%2 == 0 else '|'
                 elif (i, j) == self.apple:
-                    s += 'A'
+                    grid[2*i][2*j] = 'A'
                 else:
-                    s += '.'
-            s += '\n'
+                    grid[2*i][2*j] = '.'
+        s += '\n'.join(''.join(line) for line in grid)
         return s
 
 
 class CNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
-        self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+        self.conv1 = nn.Conv2d(7, 16, 3, padding=1)
+        self.conv2 = nn.Conv2d(16, 16, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(32 * 5 * 5, 512)
-        self.policy = nn.Linear(512, 20)
-        self.value = nn.Linear(512, 1)
+        self.fc1 = nn.Linear(16 * 5 * 5, 256)
+        self.policy = nn.Linear(256, 20)
+        self.value = nn.Linear(256, 1)
+
+        # self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
+        # self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
+        # self.pool = nn.MaxPool2d(2, 2)
+        # self.fc1 = nn.Linear(32 * 5 * 5, 512)
+        # self.policy = nn.Linear(512, 20)
+        # self.value = nn.Linear(512, 1)
     
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -215,13 +235,31 @@ class PPO():
 
         self.itCount = 0
 
+        self.checkpoints = [None] * int(boardSize**2)
+        self.furthestCheckpoint = 2
+        self.transitionPerProgress = [0] * int(boardSize**2)
+        self.transitionLengths = [0] * int(boardSize**2)
+        self.transitionPerProgress[2] = 1
+        self.transitionLengths[2] = 1
+
     def generateTrajectories(self, n_threads):
         self.model.eval()
         trajectories = []
         active_thread_hist = [list(range(n_threads))]
+
+        # activeCheckpoints = [i for i in range(boardSize**2) if self.checkpoints[i] is not None  or i == 2]
         for i in range(n_threads):
+            # checkpointIndex = random.choice(activeCheckpoints)
+            checkpointIndex = max(2, random.choices(np.arange(boardSize**2), weights=self.transitionPerProgress)[0] - checkpointSetback)
+            while self.checkpoints[checkpointIndex] is None and checkpointIndex > 2:
+                checkpointIndex -= 1
+            
+            if checkpointIndex == 2:
+                env = Environment()
+            else:
+                env = self.checkpoints[checkpointIndex]
             trajectories.append([{
-                'env': Environment(),
+                'env': env,
                 'reward': None,
                 'emp_val': None,
                 'evaluation': None,
@@ -231,12 +269,9 @@ class PPO():
         action_hist = []
         log_prob_hist = []
         dist_hist = []
-        for t in range(maxTime):
+        for t in range(maxEpisodeTime):
             inputs = []
             for i in active_thread_hist[t]:
-                # if i == 0:
-                #     print(trajectories[i][t]['env'])
-                # print(trajectories[i][t]['env'])
                 inputs.append(trajectories[i][t]['env'].toTensor())
             logits, value = self.model(torch.stack(inputs).to(device))
 
@@ -252,40 +287,16 @@ class PPO():
             valid_acts = torch.stack(valid_acts).to(device)
 
             logits = logits.masked_fill(~valid_acts, float('-inf'))
-
-            # logits[index, :] = logits[index, :].masked_fill(va == 0, float('-inf'))
             
             dist = Categorical(logits=logits)
 
             actions = dist.sample()
 
+            # I shouldn't have to do this but somehow I do:
             for resample_it in range(10):
                 if (valid_acts[torch.arange(len(actions)), actions]).all():
                     break
-                print(f"At least one invalid action, generation error. Resampling {resample_it} iteration...")
                 actions = dist.sample()
-
-            # while not (valid_acts[torch.arange(len(actions)), actions]).all():
-            #     print("At least one invalid action, generation error. Resampling...")
-            #     actions = dist.sample()
-
-            # if not (valid_acts[torch.arange(len(actions)), actions]).all():
-
-            #     print("At least one invalid action, generation error")
-            #     a = (~valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
-            #     print(a)
-            #     error_index = torch.nonzero(a)[0, 0]
-            #     print(error_index)
-            #     print("Input:")
-            #     print(inputs[error_index])
-            #     print("Valid acts:")
-            #     print(valid_acts[error_index])
-            #     print("Acts:")
-            #     print(actions[error_index])
-            #     print("Logits:")
-            #     print(logits[error_index])
-            #     print("Dist: ")
-            #     print(dist.probs[error_index])
 
             assert (valid_acts[torch.arange(len(actions)), actions]).all()
 
@@ -295,14 +306,11 @@ class PPO():
                 new_env = copy.deepcopy(trajectories[i][t]['env'])
                 trajectories[i][t]['evaluation'] = value[index].item()
                 trajectories[i][t]['reward'], endState = new_env.makeAction(actions[index].item())
-                # print("Action: " + str(actions[index]))
-                # print("Endstate: " + str(endState))
                 if endState:
                     new_active_threads.remove(i)
-                # elif t < maxTime-1:
                 trajectories[i].append({
                     'env': new_env,
-                    'reward': 0,
+                    'reward': None,
                     'emp_val': None,
                     'evaluation': 0,
                     'GAE': None
@@ -313,29 +321,88 @@ class PPO():
             dist_hist.append(dist)
             if len(new_active_threads) == 0:
                 break
-            if t < maxTime-1:
-                active_thread_hist.append(new_active_threads)
-        # print(trajectories)
+            active_thread_hist.append(new_active_threads)
+        
+        # Get terminal values
+        if len(active_thread_hist) == maxEpisodeTime+1:
+            inputs = []
+            for i in active_thread_hist[maxEpisodeTime]:
+                assert len(trajectories[i][maxEpisodeTime]['env'].validDirs()) > 0
+                inputs.append(trajectories[i][maxEpisodeTime]['env'].toTensor())
+            logits, value = self.model(torch.stack(inputs).to(device))
+            for index, i in enumerate(active_thread_hist[maxEpisodeTime]):
+                trajectories[i][maxEpisodeTime]['evaluation'] = value[index].item()
+
         for i in range(n_threads):
-            val = 0
-            emp_val = 0
+            gae_val = 0
+            emp_val = trajectories[i][-1]['evaluation']
             for t in range(len(trajectories[i])-2, -1, -1):
                 time_diff = trajectories[i][t+1]['env'].time - trajectories[i][t]['env'].time
-                val = (trajectories[i][t]['reward'] 
+                gae_val = (trajectories[i][t]['reward'] 
                        + discountRate**time_diff * trajectories[i][t+1]['evaluation'] 
                        - trajectories[i][t]['evaluation']
-                       + (discountRate * GAEparam) ** time_diff * val)
-                trajectories[i][t]['GAE'] = val
+                       + (discountRate * GAEparam) ** time_diff * gae_val)
+                trajectories[i][t]['GAE'] = gae_val
                 emp_val = trajectories[i][t]['reward'] + discountRate**time_diff * emp_val
                 trajectories[i][t]['emp_val'] = emp_val
         return trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist
+    
+    def evaluationRollouts(self, n_threads):
+        # Doesn't store trajectory
+        self.model.eval()
+        envs = []
+        active_threads = list(range(n_threads))
+        for i in range(n_threads):
+            envs.append(Environment())
+        
+        rewardSums = [0] * n_threads
+        
+        for t in range(maxRolloutTime):
+
+            inputs = []
+            valid_acts = []
+            for i in active_threads:
+                inputs.append(envs[i].toTensor())
+                valid_acts.append(envs[i].validActions())
+            
+            logits, value = self.model(torch.stack(inputs).to(device))
+            valid_acts = torch.stack(valid_acts).to(device)
+
+
+            logits = logits.masked_fill(~valid_acts, float('-inf'))
+            
+            dist = Categorical(logits=logits)
+
+            actions = dist.sample()
+
+            for resample_it in range(10):
+                if (valid_acts[torch.arange(len(actions)), actions]).all():
+                    break
+                actions = dist.sample()
+            
+            assert (valid_acts[torch.arange(len(actions)), actions]).all()
+
+            next_active_threads = copy.deepcopy(active_threads)
+            
+            for index, i in enumerate(active_threads):
+                reward, endState = envs[i].makeAction(actions[index].item())
+                if endState:
+                    next_active_threads.remove(i)
+                rewardSums[i] += reward
+            
+            active_threads = next_active_threads
+
+            if len(next_active_threads) == 0:
+                break
+        return envs, rewardSums
     
     def PPOupdate(self, batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
         self.model.train()
         identifiers = []
         for t in range(len(active_thread_hist)):
             for index in range(len(active_thread_hist[t])):
-                identifiers.append([t, index])
+                if t < maxEpisodeTime:
+                    identifiers.append([t, index])
         random.shuffle(identifiers)
         inputs = []
         emp_vals = []
@@ -374,24 +441,10 @@ class PPO():
 
                 curr_dist = Categorical(logits=logits)
 
-                if not (valid_acts[torch.arange(len(actions)), actions]).all():
-                    print("At least one invalid action, update error")
-                    a = (~valid_acts[torch.arange(len(actions)), actions]).to(torch.int64)
-                    print(a)
-                    error_index = torch.nonzero(a)[0, 0]
-                    print(error_index)
-                    print("Input:")
-                    print(inputs[error_index])
-                    print("Valid acts:")
-                    print(valid_acts[error_index])
-                    print("Acts:")
-                    print(actions[error_index])
-
                 assert (valid_acts[torch.arange(len(actions)), actions]).all()
-                # assert (curr_dist.probs[torch.arange(len(actions)), actions] > 0).all()
 
-                # ratio = torch.exp(curr_dist.log_prob(actions) - old_logprob)
-                ratio = curr_dist.probs[torch.arange(len(actions)), actions] / np.exp(old_logprob)
+                ratio = torch.exp(curr_dist.log_prob(actions) - old_logprob)
+                # ratio = curr_dist.probs[torch.arange(len(actions)), actions] / np.exp(old_logprob)
                 clipped = ratio.clip(max=1+PPOeps, min=1-PPOeps)
                 CLIP_loss = -torch.min(ratio * advantages, clipped * advantages)
 
@@ -409,102 +462,130 @@ class PPO():
                 valid_acts = []
 
 
-    def trainLoop(self, n_iter, n_threads, evalPeriod, include_accuracy=False):
+    def trainLoop(self, n_iter, n_threads, evalPeriod, gameLogPeriod, include_accuracy=False):
 
         scoreHist = []
-        sizeHist = []
         lengthsHist = []
         timesHist = []
-        accuracyHist = []
         winHist = []
         lossHist = []
-        winTimeHist = []
+        progressHist = []
 
         printLineToFile(self.mainOutput, "Starting training, Previous iterations: " + str(self.itCount) + " Current iterations: " + str(n_iter) + " Timestamp: " + str(datetime.now()))
-        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxTime: {maxTime}, appleReward: {appleReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
-        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, PPOeps: {PPOeps}, batchSize: {batchSize}, numThreads: {n_threads}')
+        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxEpisodeTime: {maxEpisodeTime}, appleReward: {appleReward}, loseReward: {loseReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
+        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, PPOeps: {PPOeps}, batchSize: {batchSize}, numThreads: {n_threads}, transitionDecay: {transitionDecay}, checkpointSetback: {checkpointSetback}, numReplacements: {numReplacements}')
 
         for it in range(n_iter):
             
-            with open(self.debugOutput, 'a') as f:
-                s = 0
-                c = 0
-                for param_tens in self.model.parameters():
-                    s += param_tens.abs().sum()
-                    c += len(param_tens.flatten())
-                f.write(f"Iteration {it}, Abs net weight: {s/c}\n")
+            # with open(self.debugOutput, 'a') as f:
+                # s = 0
+                # c = 0
+                # for param_tens in self.model.parameters():
+                #     s += param_tens.abs().sum()
+                #     c += len(param_tens.flatten())
+                # f.write(f"Iteration {it}, Abs net weight: {s/c}\n")
 
             trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist = self.generateTrajectories(n_threads)
             self.PPOupdate(batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist)
 
+            # Update checkpoints
+
+            for traj in trajectories:
+                prevSize = None
+                numSteps = 0
+                cum_time = 0
+                for t in range(len(traj)-1):
+                    size = (traj[t]['env'].body != -1).sum() + 1
+                    if self.checkpoints[size] is None or random.random() < numReplacements / (n_threads * maxEpisodeTime):
+                        self.checkpoints[size] = traj[t]['env']
+                    if prevSize != None and size > prevSize:
+                        self.transitionLengths[prevSize] = (transitionDecay * self.transitionLengths[prevSize] + 
+                                                      (1 - transitionDecay) * numSteps)
+                        self.transitionPerProgress[prevSize] = (transitionDecay * self.transitionPerProgress[prevSize] + 
+                                                      (1 - transitionDecay) * cum_time / (size - prevSize))
+                        numSteps = 0
+                        cum_time = 0
+                    prevSize = size
+                    numSteps += 1
+                    cum_time += traj[t+1]['env'].time - traj[t]['env'].time
+            for i in range(boardSize**2):
+                if self.checkpoints[i] is not None:
+                    self.furthestCheckpoint = i
+
             # Evaluation
 
             scores = []
-            sizes = []
             lengths = []
+            sizeDiffs = []
             times = []
             wins = []
             losses = []
-            winTimes = []
 
             for traj in trajectories:
-                # size = (traj[-1]['env'].body != -1).sum() + 1
-                # sizes.append(size)
                 score = sum(s['reward'] for s in traj[:-1])
                 scores.append(score)
-
-                size = (traj[-1]['env'].body != -1).sum() + 1
-                sizes.append(size)
 
                 game_length = len(traj)-1
                 lengths.append(game_length)
 
-                elapsed_time = traj[-1]['env'].time
+                elapsed_time = traj[-1]['env'].time - traj[0]['env'].time
                 times.append(elapsed_time)
+
+                sizeDiff = (traj[-1]['env'].body != -1).sum() - (traj[0]['env'].body != -1).sum()
+                sizeDiffs.append(sizeDiff)
 
                 win = (traj[-1]['env'].body == -1).sum() == 1
                 wins.append(win)
                 losses.append((len(traj[-1]['env'].validDirs()) == 0) and not win)
-
-                if win:
-                    winTimes.append(elapsed_time)
-            
-            if include_accuracy:
-                acc = []
-                for index in range(n_threads):
-                    for t in range(len(active_thread_hist)):
-                        try:
-                            i = active_thread_hist[t].index(index)
-                        except ValueError:
-                            continue
-                        acc.append(action_hist[t][i] in trajectories[index][t]['env'].bestActions())
-                
-                accuracyHist.append(np.array(acc).mean())
-            
+                        
             scoreHist.append(np.array(scores).mean())
-            sizeHist.append(np.array(sizes).mean())
             timesHist.append(np.array(times).mean())
             lengthsHist.append(np.array(lengths).mean())
             winHist.append(np.array(wins).mean())
             lossHist.append(np.array(losses).mean())
-            winTimeHist.append(np.array(winTimes).sum())
+            progressHist.append(np.array(sizeDiffs).sum() / np.array(times).sum())
+            
+            
+            
 
             self.itCount += 1
             if self.itCount % evalPeriod == 0:
-                avgWinTime = "NA"
                 winRate = np.array(winHist[-evalPeriod:]).mean()
-                if winRate > 0:
-                    avgWinTime = str(np.array(winTimeHist[-evalPeriod:]).mean() / winRate / n_threads)
                 printLineToFile(self.mainOutput, "Iteration: " + str(self.itCount) + 
-                            " Score: " + str(np.array(scoreHist[-evalPeriod:]).mean()) +
-                            " Size: " + str(np.array(sizeHist[-evalPeriod:]).mean()) +
+                            " Score: " + colored(str(np.array(scoreHist[-evalPeriod:]).mean()), 'red') + 
                             " Game Length: " + str(np.array(lengthsHist[-evalPeriod:]).mean()) + 
                             " Elapsed Time: " + str(np.array(timesHist[-evalPeriod:]).mean()) + 
                             " Wins: " + str(winRate) + 
                             " Losses: " + str(np.array(lossHist[-evalPeriod:]).mean()) + 
-                            " Win Time: " + avgWinTime + 
-                            (" Accuracy: " + str(np.array(accuracyHist[-evalPeriod:]).mean()) if include_accuracy else "") + 
+                            " Furthest Checkpoint: " + str(self.furthestCheckpoint) + 
+                            " Progress: " + colored(str(np.array(progressHist[-evalPeriod:]).mean()), 'green') + 
                             " Timestamp: " + str(datetime.now()))
+                
+                envs, rewards = self.evaluationRollouts(n_threads)
+                wins = []
+                losses = []
+                winTime = []
+                sizes = []
+                for env in envs:
+                    size = (env.body != -1).sum() + 1
+                    win = size == boardSize ** 2
+                    sizes.append(size)
+                    wins.append(win)
+                    loss = len(env.validDirs()) == 0 and not win
+                    losses.append(loss)
+                    if win:
+                        winTime.append(env.time)
+                evalWinRate = np.array(wins).mean()
+                evalLossRate = np.array(losses).mean()
+                evalWinTime = "NA" if evalWinRate == 0 else np.array(winTime).sum() / np.array(wins).sum()
+                evalSize = np.array(sizes).mean()
+
+                printLineToFile(self.mainOutput, "    " + 
+                                " Eval score: " + str(np.array(rewards).mean()) + 
+                                " Eval size: " + str(evalSize) + 
+                                " Eval wins: " + colored(str(evalWinRate), 'blue') + 
+                                " Eval losses: " + str(evalLossRate) + 
+                                " Eval win time: " + colored(str(evalWinTime), 'blue'))
 
                 if winRate > anneal_winRate and not self.annealed:
                     self.annealed = True
@@ -512,37 +593,43 @@ class PPO():
                     self.entropy_coef = anneal_entropy_coef
                     printLineToFile(self.mainOutput, f"Iteration {self.itCount}: Learning rate set to {anneal_learning_rate}. Entropy coef set to {self.entropy_coef}.")
                 
-                with open(self.gameOutput, 'a') as f:
-                    s = "----------------------------- Iteration " + str(self.itCount) + ' -----------------------------\n'
-                    index = 0
-                    # for index in range(n_threads):
-                    s += '"################ Thread ' + str(index) + ' ################\n'
-                    for t in range(len(active_thread_hist)):
-                        try:
-                            i = active_thread_hist[t].index(index)
-                        except ValueError:
-                            continue
-                        s += 'Step: ' + str(t) + '\n'
-                        s += str(trajectories[index][t]['env']) + '\n'
-                        s += 'Reward: ' + str(trajectories[index][t]['reward']) + '\n'
-                        s += 'Emp Val: ' + str(trajectories[index][t]['emp_val']) + '\n'
-                        s += 'Action: ' + str(action_hist[t][i]) + '\n'
-                        s += 'Probs: ' + str(dist_hist[t].probs[i]) + '\n'
-                        s += 'Net value: ' + str(value_hist[t][i]) + '\n'
-                        s += '\n'
-                    f.write(s)
+                if self.itCount % gameLogPeriod == 0:
+                    with open(self.gameOutput, 'a') as f:
+                        s = "----------------------------- Iteration " + str(self.itCount) + ' -----------------------------\n'
+                        index = 0
+                        # for index in range(n_threads):
+                        s += '"################ Thread ' + str(index) + ' ################\n'
+                        for t in range(min(len(active_thread_hist), maxEpisodeTime)):
+                            try:
+                                i = active_thread_hist[t].index(index)
+                            except ValueError:
+                                continue
+                            s += 'Step: ' + str(t) + '\n'
+                            s += str(trajectories[index][t]['env']) + '\n'
+                            s += 'Reward: ' + str(trajectories[index][t]['reward']) + '\n'
+                            s += 'Emp Val: ' + str(trajectories[index][t]['emp_val']) + '\n'
+                            s += 'Action: ' + str(action_hist[t][i]) + '\n'
+                            s += 'Probs: ' + str(dist_hist[t].probs[i]) + '\n'
+                            s += 'Net value: ' + str(value_hist[t][i]) + '\n'
+                            s += '\n'
+                        f.write(s)
                 
                 with open('snake.pkl', 'wb') as file:
                     pickle.dump(self, file)
 
+                with open(self.debugOutput, 'a') as f:
+                    f.write("Iteration " + str(it) + ' Lengths: ' + str(self.transitionLengths) + '\n')
+                    f.write('    Time per progress: ' + str(self.transitionPerProgress) + '\n')
 
-mode = "WRITE"
 
-if mode == 'WRITE':
-    ppo = PPO()
-else:
-    assert mode == 'READ'
-    with open('snake.pkl', 'rb') as file:
-        ppo = pickle.load(file)
+if __name__ == '__main__':
+    mode = "READ"
 
-ppo.trainLoop(3000, 32, 100)
+    if mode == 'WRITE':
+        ppo = PPO()
+    else:
+        assert mode == 'READ'
+        with open('snake.pkl', 'rb') as file:
+            ppo = pickle.load(file)
+
+    ppo.trainLoop(n_iter=5000, n_threads=32, evalPeriod=500, gameLogPeriod=500)

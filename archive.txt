@@ -872,3 +872,14 @@ Iteration: 1800 Score: 12.191199881153667 Size: 78.8646875 Game Length: 221.2884
 Iteration: 1900 Score: 13.012450308599988 Size: 82.8184375 Game Length: 220.5984375 Elapsed Time: 925.2496875 Wins: 0.6684375 Losses: 0.3309375 Win Time: 1125.1051893408135 Timestamp: 2026-01-13 00:11:19.831599
 At least one invalid action, generation error. Resampling 0 iteration...
 Iteration: 2000 Score: 13.207734384557462 Size: 84.193125 Game Length: 229.886875 Elapsed Time: 967.6003125 Wins: 0.676875 Losses: 0.315 Win Time: 1141.6024930747922 Timestamp: 2026-01-13 00:18:22.385406
+
+
+
+
+
+
+
+
+
+
+
