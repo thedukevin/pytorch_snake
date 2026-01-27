@@ -1,4 +1,13 @@
 
+"""
+
+Running on cloud:
+nohup python snake.py WRITE 5000 32 50 100 100 &
+
+
+"""
+
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -8,7 +17,6 @@ from torchinfo import summary
 from torch.distributions import Categorical
 import copy
 import pickle
-import matplotlib.pyplot as plt
 import numpy as np
 import time
 from datetime import datetime
@@ -23,21 +31,22 @@ torch.manual_seed(42)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using device " + str(device))
 
-boardSize = 10
-maxEpisodeTime = 50
-maxRolloutTime = 400
-discountRate = 0.99
-GAEparam = 0.95
+boardSize = 30
+maxEpisodeTime = 100
+maxRolloutTime = 3000
+discountRate = 0.995
+GAEparam = 0.98
 PPOeps = 0.2
 
-checkpointSetback = 5
+checkpointSetback = 0
 replacementProb = None
 numReplacements = 50
 transitionDecay = 0.95
+advanceProb = 0
 
 # Network params
 # Note that having more actions doesn't necessarily mean you use a lower entropy coef.
-value_coef = 1
+value_coef = 0.5
 entropy_coef = 0.03
 learning_rate = 1e-03
 batchSize = 256
@@ -57,23 +66,29 @@ def isValid(pos):
     return 0 <= pos[0] < boardSize and 0 <= pos[1] < boardSize
 
 appleReward = 0.2
-winReward = 0
+winReward = 1
 loseReward = -1
+actionReward = 0
 
 class Environment:
     def __init__(self):
         self.body = np.full((boardSize, boardSize), -1)
-        self.head = (5, 2)
-        self.tail = (5, 1)
-        self.editBody(self.tail, 0)
+        self.pathTime = np.zeros((boardSize, boardSize))
+        self.head = (boardSize//2, 2)
+        self.tail = (boardSize//2, 1)
+        self.body[self.tail] = 0
+        self.pathTime[self.head] = 0
+        self.pathTime[self.tail] = -1
         self.randomizeApple()
         self.time = 0
+
+        self.potential = self.getPotential()
     
     def validDirs(self):
         validDirs = []
         for d in range(4):
             newHead = shiftPos(self.head, d)
-            if isValid(newHead) and self.queryBody(newHead) == -1:
+            if isValid(newHead) and self.body[newHead] == -1:
                 validDirs.append(d)
         return validDirs
 
@@ -84,7 +99,7 @@ class Environment:
         for d in range(4):
             pos = shiftPos(self.head, d)
             while isValid(pos):
-                if self.queryBody(pos) != -1:
+                if self.body[pos] != -1:
                     break
                 acts[d%2][pos[1-d%2]] = 1
                 if pos == self.apple:
@@ -94,18 +109,83 @@ class Environment:
 
     def primitiveAction(self, d): # returns whether apple was acheived
         assert d in self.validDirs()
-        self.editBody(self.head, d)
+        self.body[self.head] = d
         self.head = shiftPos(self.head, d)
         self.time += 1
+        self.pathTime[self.head] = self.time
 
         if self.head == self.apple:
             self.randomizeApple()
             return 1
         else:
-            tailDir = self.queryBody(self.tail)
-            self.editBody(self.tail, -1)
+            tailDir = self.body[self.tail]
+            self.body[self.tail] = -1
             self.tail = shiftPos(self.tail, tailDir)
             return 0
+    
+    def getPotential(self): # This takes up a lot of run time for some reason
+        return 0
+        # self.potential = 0
+        # visited = np.full((boardSize, boardSize), False)
+
+        # tailVisible = False
+        # appleDist = None
+
+        # queue = np.array([self.head])
+        # visited[self.head] = True
+        # for step in range(boardSize**2):
+        #     next_queue = []
+        #     for d in range(4):
+        #         next_queue.append(queue + np.array([dir[d]]))
+            
+        #     next_queue = np.concatenate(next_queue)
+        #     next_queue = next_queue[((0 <= next_queue) & (next_queue < boardSize)).all(axis=1)]
+
+        #     x = next_queue[:, 0] * boardSize + next_queue[:, 1]
+        #     x = np.unique(x)
+        #     next_queue = np.stack([x // boardSize, x % boardSize], axis=1)
+
+        #     if (next_queue == np.array([self.tail])).all(axis=1).any() and step > 0:
+        #         tailVisible = True
+        #     next_queue = next_queue[(self.body[next_queue[:, 0], next_queue[:, 1]] == -1) & ~visited[next_queue[:, 0], next_queue[:, 1]]]
+
+        #     if len(next_queue) == 0:
+        #         break
+        #     visited[next_queue[:, 0], next_queue[:, 1]] = True
+        #     if (next_queue == np.array([self.apple])).all(axis=1).any() and appleDist is None:
+        #         appleDist = step
+        #     if tailVisible and appleDist:
+        #         break
+        #     queue = next_queue
+
+        # # queue = [self.head]
+        # # visited[self.head] = True
+        # # finished = False
+        # # for step in range(boardSize**2):
+        # #     next_queue = []
+        # #     for pos in queue:
+        # #         for d in range(4):
+        # #             newPos = shiftPos(pos, d)
+        # #             if isValid(newPos) and self.queryBody(newPos) == -1 and not visited[newPos]:
+        # #                 next_queue.append(newPos)
+        # #                 visited[newPos] = True
+        # #             if newPos == self.tail and step > 0:
+        # #                 tailVisible = True
+        # #             if newPos == self.apple and appleDist is None:
+        # #                 appleDist = step
+        # #             if tailVisible and appleDist:
+        # #                 finished = True
+        # #     queue = next_queue
+        # #     if len(queue) == 0 or finished:
+        # #         break
+        
+        # # a, b = self.getPotentialAlt()
+        # # assert a == tailVisible and b == appleDist
+        
+        # tailVisiblePot = (1 - tailVisible) * -0.5
+        # appleDistPot = 0 if appleDist is None else 0.05 * 0.98 ** appleDist
+
+        # return tailVisiblePot + appleDistPot
 
     def makeAction(self, action):
         actionOrient = action >= boardSize
@@ -116,7 +196,8 @@ class Environment:
         d = actionOrient + actionDir*2
 
         init_time = self.time
-        reward = -0.01
+        init_pot = self.potential
+        reward = actionReward
 
         for i in range(actionMag):
             isApple = self.primitiveAction(d)
@@ -127,17 +208,19 @@ class Environment:
             reward += isApple * appleReward * discountRate ** (self.time - init_time)
 
         if np.sum(self.body == -1) == 1:
-            return reward + winReward, True
+            return winReward, True
         if len(self.validDirs()) == 0:
             return loseReward, True
-            
-        return reward, False
+        
+        self.potential = self.getPotential()
+
+        return reward + self.potential * discountRate ** (self.time - init_time) - init_pot, False
     
-    def editBody(self, pos, newElement):
-        self.body[pos[0]][pos[1]] = newElement
+    # def editBody(self, pos, newElement):
+    #     self.body[pos[0]][pos[1]] = newElement
     
-    def queryBody(self, pos):
-        return self.body[pos[0]][pos[1]]
+    # def queryBody(self, pos):
+    #     return self.body[pos[0]][pos[1]]
     
     def randomizeApple(self):
         openSquares = [(i, j) for i in range(boardSize) for j in range(boardSize) if self.body[i][j] == -1 and (i, j) != self.head]
@@ -146,16 +229,21 @@ class Environment:
         self.apple = openSquares[np.random.randint(len(openSquares))]
     
     def toTensor(self):
-        arr = np.zeros((7, boardSize, boardSize))
+        arr = np.zeros((8, boardSize, boardSize))
         for i in range(4):
             arr[i][self.body == i] = 1
-        arr[4, self.head[0], self.head[1]] = 5
-        arr[5, self.tail[0], self.tail[1]] = 5
-        arr[6, self.apple[0], self.apple[1]] = 5
+        arr[4, self.head[0], self.head[1]] = boardSize / 2
+        arr[5, self.tail[0], self.tail[1]] = boardSize / 2
+        arr[6, self.apple[0], self.apple[1]] = boardSize / 2
+        arr[7] = np.where(self.body != -1, 0.98 **(self.pathTime-self.pathTime[self.tail]), 0)
         return torch.tensor(arr).to(torch.float32)
 
     def __str__(self):
         s = "Time: " + str(self.time) + '\n'
+        s += "Head: " + str(self.head) + '\n'
+        s += "Apple: " + str(self.apple) + '\n'
+        s += "Size: " + str((self.body != -1).sum() + 1) + '\n'
+        s += "Potential: " + str(self.potential) + '\n'
         grid = []
         for i in range(2*boardSize-1):
             grid.append([' '] * (2*boardSize-1))
@@ -174,16 +262,39 @@ class Environment:
         s += '\n'.join(''.join(line) for line in grid)
         return s
 
+# env = Environment()
+# print(env)
+# print(env.makeAction(12))
+# print(env)
+# print(env.makeAction(33))
+# print(env)
+# print(env.makeAction(18))
+# print(env.makeAction(44))
+# print(env)
+# print(env.toTensor()[7])
+
 
 class CNN(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(7, 16, 3, padding=1)
+        # self.conv1 = nn.Conv2d(7, 16, 3, padding=1)
+        # self.conv2 = nn.Conv2d(16, 16, 3, padding=1)
+        # self.conv3 = nn.Conv2d(16, 16, 3, padding=1)
+        # self.conv4 = nn.Conv2d(16, 32, 4, padding=1)
+        # self.pool1 = nn.MaxPool2d(2, 2)
+        # self.pool2 = nn.MaxPool2d(2, 2)
+        # self.fc1 = nn.Linear(32 * 7 * 7, 1024)
+        # self.policy = nn.Linear(1024, 60)
+        # self.value = nn.Linear(1024, 1)
+
+        self.conv1 = nn.Conv2d(7, 16, 5, padding=1)
         self.conv2 = nn.Conv2d(16, 16, 3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(16 * 5 * 5, 256)
-        self.policy = nn.Linear(256, 20)
-        self.value = nn.Linear(256, 1)
+        self.conv3 = nn.Conv2d(16, 32, 3, padding=1)
+        self.pool1 = nn.MaxPool2d(2, 2)
+        self.pool2 = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(32 * 7 * 7, 1024)
+        self.policy = nn.Linear(1024, 60)
+        self.value = nn.Linear(1024, 1)
 
         # self.conv1 = nn.Conv2d(7, 32, 3, padding=1)
         # self.conv2 = nn.Conv2d(32, 32, 3, padding=1)
@@ -194,8 +305,10 @@ class CNN(nn.Module):
     
     def forward(self, x):
         x = F.relu(self.conv1(x))
+        x = self.pool1(x)
         x = F.relu(self.conv2(x))
-        x = self.pool(x)
+        x = F.relu(self.conv3(x))
+        x = self.pool2(x)
         x = torch.flatten(x, 1)
         x = F.relu(self.fc1(x))
         return self.policy(x), self.value(x)
@@ -224,13 +337,13 @@ class PPO():
         with open(self.debugOutput, 'w') as f:
             f.write("")
         
-        self.mainOutput = None
+        self.mainOutput = "main.txt"
         if self.mainOutput is not None:
             with open(self.mainOutput, 'w') as f:
                 f.write("")
 
 
-        s = str(summary(self.model, input_size=(1, 7, 10, 10), verbose=0))
+        s = str(summary(self.model, input_size=(1, ) + Environment().toTensor().shape, verbose=0))
         printLineToFile(self.mainOutput, s)
 
         self.itCount = 0
@@ -251,6 +364,9 @@ class PPO():
         for i in range(n_threads):
             # checkpointIndex = random.choice(activeCheckpoints)
             checkpointIndex = max(2, random.choices(np.arange(boardSize**2), weights=self.transitionPerProgress)[0] - checkpointSetback)
+            if random.random() < min(advanceProb, 1 - (self.furthestCheckpoint / boardSize**2)):
+                checkpointIndex = max(2, random.randint(self.furthestCheckpoint-10, self.furthestCheckpoint))
+            
             while self.checkpoints[checkpointIndex] is None and checkpointIndex > 2:
                 checkpointIndex -= 1
             
@@ -345,7 +461,7 @@ class PPO():
                 trajectories[i][t]['GAE'] = gae_val
                 emp_val = trajectories[i][t]['reward'] + discountRate**time_diff * emp_val
                 trajectories[i][t]['emp_val'] = emp_val
-        return trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist
+        return trajectories, active_thread_hist, value_hist, action_hist, dist_hist
     
     def evaluationRollouts(self, n_threads):
         # Doesn't store trajectory
@@ -356,6 +472,7 @@ class PPO():
             envs.append(Environment())
         
         rewardSums = [0] * n_threads
+        lengths = [0] * n_threads
         
         for t in range(maxRolloutTime):
 
@@ -388,15 +505,16 @@ class PPO():
                 reward, endState = envs[i].makeAction(actions[index].item())
                 if endState:
                     next_active_threads.remove(i)
+                lengths[i] += 1
                 rewardSums[i] += reward
             
             active_threads = next_active_threads
 
             if len(next_active_threads) == 0:
                 break
-        return envs, rewardSums
+        return envs, rewardSums, lengths
     
-    def PPOupdate(self, batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist):
+    def PPOupdate(self, batchSize, trajectories, active_thread_hist, action_hist, dist_hist):
         self.model.train()
         identifiers = []
         for t in range(len(active_thread_hist)):
@@ -462,7 +580,7 @@ class PPO():
                 valid_acts = []
 
 
-    def trainLoop(self, n_iter, n_threads, evalPeriod, gameLogPeriod, include_accuracy=False):
+    def trainLoop(self, n_iter, n_threads, evalPeriod, rolloutPeriod, gameLogPeriod, include_accuracy=False):
 
         scoreHist = []
         lengthsHist = []
@@ -472,8 +590,8 @@ class PPO():
         progressHist = []
 
         printLineToFile(self.mainOutput, "Starting training, Previous iterations: " + str(self.itCount) + " Current iterations: " + str(n_iter) + " Timestamp: " + str(datetime.now()))
-        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxEpisodeTime: {maxEpisodeTime}, appleReward: {appleReward}, loseReward: {loseReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
-        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, PPOeps: {PPOeps}, batchSize: {batchSize}, numThreads: {n_threads}, transitionDecay: {transitionDecay}, checkpointSetback: {checkpointSetback}, numReplacements: {numReplacements}')
+        printLineToFile(self.mainOutput, f'Environment: {environment_name}, boardSize: {boardSize}, maxEpisodeTime: {maxEpisodeTime}, appleReward: {appleReward}, loseReward: {loseReward}, winReward: {winReward}, actionReward: {actionReward}, discountRate: {discountRate}, GAEParam: {GAEparam}')
+        printLineToFile(self.mainOutput, f'Value coef: {value_coef}, Entropy coef: {entropy_coef}, Learning rate: {learning_rate}, PPOeps: {PPOeps}, batchSize: {batchSize}, numThreads: {n_threads}, transitionDecay: {transitionDecay}, checkpointSetback: {checkpointSetback}, numReplacements: {numReplacements}, advanceProb: {advanceProb}')
 
         for it in range(n_iter):
             
@@ -485,8 +603,8 @@ class PPO():
                 #     c += len(param_tens.flatten())
                 # f.write(f"Iteration {it}, Abs net weight: {s/c}\n")
 
-            trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist = self.generateTrajectories(n_threads)
-            self.PPOupdate(batchSize, trajectories, active_thread_hist, value_hist, action_hist, log_prob_hist, dist_hist)
+            trajectories, active_thread_hist, value_hist, action_hist, dist_hist = self.generateTrajectories(n_threads)
+            self.PPOupdate(batchSize, trajectories, active_thread_hist, action_hist, dist_hist)
 
             # Update checkpoints
 
@@ -561,31 +679,37 @@ class PPO():
                             " Progress: " + colored(str(np.array(progressHist[-evalPeriod:]).mean()), 'green') + 
                             " Timestamp: " + str(datetime.now()))
                 
-                envs, rewards = self.evaluationRollouts(n_threads)
-                wins = []
-                losses = []
-                winTime = []
-                sizes = []
-                for env in envs:
-                    size = (env.body != -1).sum() + 1
-                    win = size == boardSize ** 2
-                    sizes.append(size)
-                    wins.append(win)
-                    loss = len(env.validDirs()) == 0 and not win
-                    losses.append(loss)
-                    if win:
-                        winTime.append(env.time)
-                evalWinRate = np.array(wins).mean()
-                evalLossRate = np.array(losses).mean()
-                evalWinTime = "NA" if evalWinRate == 0 else np.array(winTime).sum() / np.array(wins).sum()
-                evalSize = np.array(sizes).mean()
+                if self.itCount % rolloutPeriod == 0:
+                    envs, rewards, lengths = self.evaluationRollouts(n_threads)
+                    wins = []
+                    losses = []
+                    winTime = []
+                    times = []
+                    sizes = []
+                    for env in envs:
+                        size = (env.body != -1).sum() + 1
+                        win = size == boardSize ** 2
+                        sizes.append(size)
+                        wins.append(win)
+                        loss = len(env.validDirs()) == 0 and not win
+                        losses.append(loss)
+                        times.append(env.time)
+                        if win:
+                            winTime.append(env.time)
+                    evalWinRate = np.array(wins).mean()
+                    evalLossRate = np.array(losses).mean()
+                    evalWinTime = "NA" if evalWinRate == 0 else np.array(winTime).sum() / np.array(wins).sum()
+                    evalSize = np.array(sizes).mean()
+                    evalTime = np.array(times).mean()
 
-                printLineToFile(self.mainOutput, "    " + 
-                                " Eval score: " + str(np.array(rewards).mean()) + 
-                                " Eval size: " + str(evalSize) + 
-                                " Eval wins: " + colored(str(evalWinRate), 'blue') + 
-                                " Eval losses: " + str(evalLossRate) + 
-                                " Eval win time: " + colored(str(evalWinTime), 'blue'))
+                    printLineToFile(self.mainOutput, "    " + 
+                                    " Eval score: " + str(np.array(rewards).mean()) + 
+                                    " Eval length: " + str(np.array(lengths).mean()) + 
+                                    " Eval size: " + str(evalSize) + 
+                                    " Eval wins: " + colored(str(evalWinRate), 'blue') + 
+                                    " Eval losses: " + str(evalLossRate) + 
+                                    " Eval time: " + str(evalTime) + 
+                                    " Eval win time: " + colored(str(evalWinTime), 'blue'))
 
                 if winRate > anneal_winRate and not self.annealed:
                     self.annealed = True
@@ -621,15 +745,17 @@ class PPO():
                     f.write("Iteration " + str(it) + ' Lengths: ' + str(self.transitionLengths) + '\n')
                     f.write('    Time per progress: ' + str(self.transitionPerProgress) + '\n')
 
+mode = sys.argv[1]
 
-if __name__ == '__main__':
-    mode = "READ"
+if mode == 'WRITE':
+    ppo = PPO()
+else:
+    assert mode == 'READ'
+    with open('snake.pkl', 'rb') as file:
+        ppo = pickle.load(file)
 
-    if mode == 'WRITE':
-        ppo = PPO()
-    else:
-        assert mode == 'READ'
-        with open('snake.pkl', 'rb') as file:
-            ppo = pickle.load(file)
-
-    ppo.trainLoop(n_iter=5000, n_threads=32, evalPeriod=500, gameLogPeriod=500)
+ppo.trainLoop(n_iter=int(sys.argv[2]),
+             n_threads=int(sys.argv[3]), 
+             evalPeriod=int(sys.argv[4]),
+             rolloutPeriod=int(sys.argv[5]),
+             gameLogPeriod=int(sys.argv[6]))
