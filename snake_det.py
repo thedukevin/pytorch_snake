@@ -21,6 +21,9 @@ def shiftPos(pos, d):
 def isValid(pos):
     return 0 <= pos[0] < boardSize and 0 <= pos[1] < boardSize
 
+def manhattanDist(pos1, pos2):
+    return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+
 class Environment:
     def __init__(self):
         self.body = np.full((boardSize, boardSize), -1)
@@ -38,7 +41,7 @@ class Environment:
                 validDirs.append(d)
         return validDirs
 
-    def detAction(self, d): # returns whether apple was acheived
+    def detAction(self, d, forceGrow=False): # returns whether apple was acheived
         assert d in self.validDirs()
         self.body[self.head] = d
         self.head = shiftPos(self.head, d)
@@ -46,11 +49,11 @@ class Environment:
 
         if self.head == self.apple:
             return 1
-        else:
+        elif not forceGrow:
             tailDir = self.body[self.tail]
             self.body[self.tail] = -1
             self.tail = shiftPos(self.tail, tailDir)
-            return 0
+        return 0
     
     
     def randomizeApple(self):
@@ -90,40 +93,43 @@ def heuristic(env):
     retractible = env.body.copy()
     curr_tail = env.tail
 
-    queue = [env.head]
-    visited[env.head] = 1
-
-    finished = False
     dist = None
-    for i in range(boardSize**2):
-        next_queue = []
-        for pos in queue:
-            if pos == env.apple:
-                dist = i
-                finished = True
-                break
-            for d in range(4):
-                newPos = shiftPos(pos, d)
-                if isValid(newPos) and (retractible[newPos] == -1) and (visited[newPos] == 0):
-                    visited[newPos] = 1
-                    next_queue.append(newPos)
-        if finished:
-            break
-        if curr_tail != env.head:
-            retractible[curr_tail] = -1
-            for d in range(4):
-                neigh = shiftPos(curr_tail, d)
-                if isValid(neigh) and visited[neigh]:
-                    next_queue.append(neigh)
-            curr_tail = shiftPos(curr_tail, env.body[curr_tail])
-        queue = next_queue
-    
     if env.apple != (-1, -1):
+
+        queue = [env.head]
+        visited[env.head] = 1
+
+        finished = False
+        for i in range(boardSize**2):
+            next_queue = []
+            for pos in queue:
+                if pos == env.apple:
+                    dist = i
+                    finished = True
+                    break
+                for d in range(4):
+                    newPos = shiftPos(pos, d)
+                    if isValid(newPos) and (retractible[newPos] == -1) and (visited[newPos] == 0):
+                        visited[newPos] = 1
+                        next_queue.append(newPos)
+            if finished:
+                break
+            if curr_tail != env.head:
+                retractible[curr_tail] = -1
+                for d in range(4):
+                    neigh = shiftPos(curr_tail, d)
+                    if isValid(neigh) and visited[neigh]:
+                        next_queue.append(neigh)
+                curr_tail = shiftPos(curr_tail, env.body[curr_tail])
+            queue = next_queue
+    
         assert dist is not None
     
-    distBonus = -0.02 * dist if dist is not None else 0
+    distBonus = -dist if dist is not None else 0
 
-    # Get tail vis
+    # Get visibility after retraction - i.e. using retractible as graph
+
+    retractible[curr_tail] = -1
 
     visited = np.zeros((boardSize, boardSize))
     tin = np.full((boardSize, boardSize), -1)
@@ -140,7 +146,7 @@ def heuristic(env):
         children = 0
         for d in range(4):
             newPos = shiftPos(v, d)
-            if not isValid(newPos) or env.body[newPos] != -1 or newPos == p:
+            if not isValid(newPos) or retractible[newPos] != -1 or newPos == p:
                 continue
             if visited[newPos]:
                 low[v] = min(low[v], tin[newPos])
@@ -160,9 +166,9 @@ def heuristic(env):
     components = np.full((boardSize, boardSize), -1)
     componentCount = 0
 
-    visibility = {}
     componentSizes = {}
     compConnectedAPs = {}
+    parent = {}
 
     def fillComponent(start, compID):
         queue = [start]
@@ -172,7 +178,7 @@ def heuristic(env):
             top = queue.pop()
             for d in range(4):
                 newPos = shiftPos(top, d)
-                if isValid(newPos) and env.body[newPos] == -1 and components[newPos] == -1:
+                if isValid(newPos) and retractible[newPos] == -1 and components[newPos] == -1:
                     if isAP[newPos] == 0:
                         components[newPos] = compID
                         queue.append(newPos)
@@ -182,14 +188,19 @@ def heuristic(env):
         componentSizes[compID] = size
         return connectedAPs
 
-    queue = [env.head]
-    if isAP[env.head]:
-        visibility[env.head] = 1
-        components[env.head] = -2
+    # Find visibility from apple position
+
+    if env.apple == (-1, -1):
+        start = env.head
     else:
-        components[env.head] = componentCount
-        compConnectedAPs[componentCount] = fillComponent(env.head, componentCount)
-        visibility[componentCount] = componentSizes[componentCount]
+        start = env.apple
+
+    queue = [start]
+    if isAP[start]:
+        components[start] = -2
+    else:
+        components[start] = componentCount
+        compConnectedAPs[componentCount] = fillComponent(start, componentCount)
         componentCount += 1
 
     while len(queue) > 0:
@@ -197,46 +208,104 @@ def heuristic(env):
         if isAP[top] == 1:
             for d in range(4):
                 newPos = shiftPos(top, d)
-                if isValid(newPos) and (env.body[newPos] == -1) and (components[newPos] == -1):
+                if isValid(newPos) and (retractible[newPos] == -1) and (components[newPos] == -1):
                     queue.append(newPos)
                     if isAP[newPos]:
                         components[newPos] = -2
-                        visibility[newPos] = visibility[top] + 1
+                        parent[newPos] = top
                     else:
                         components[newPos] = componentCount
                         compConnectedAPs[componentCount] = fillComponent(newPos, componentCount)
-                        visibility[componentCount] = visibility[top] + componentSizes[componentCount]
+                        parent[componentCount] = top
                         componentCount += 1
         else:
             for conn in compConnectedAPs[components[top]]:
                 if components[conn] == -1:
                     components[conn] = -2
-                    visibility[conn] = visibility[components[top]] + 1
+                    parent[conn] = int(components[top])
                     queue.append(conn)
-
-    toTailVis = -1
-    for d in range(4):
-        tail_neigh = shiftPos(env.tail, d)
-        if isValid(tail_neigh) and env.body[tail_neigh] == -1 and visited[tail_neigh] == 1:
-            if isAP[tail_neigh] == 1:
-                vis = visibility[tail_neigh]
-            else:
-                assert components[tail_neigh] >= 0
-                vis = visibility[components[tail_neigh]]
-            toTailVis = max(toTailVis, vis)
     
-    if toTailVis != -1:
-        maxVis = toTailVis
-        tailVis = 1
+    for i in range(boardSize):
+        for j in range(boardSize):
+            if retractible[i, j] == -1 and components[i, j] == -1:
+                components[i, j] = componentCount
+                _ = fillComponent((i, j), componentCount)
+                componentCount += 1
+
+    headComp = env.head if isAP[env.head] else int(components[env.head])
+    tailComp = curr_tail if isAP[curr_tail] else int(components[curr_tail])
+
+    def addVis(comp, rootComp):
+        while comp in parent and comp != rootComp:
+            visibleComponents.add(comp)
+            comp = parent[comp]
+    
+    if env.apple != (-1, -1):
+        appleComp = env.apple if isAP[env.apple] else int(components[env.apple])
+        visibleComponents = {appleComp}
+
+        addVis(headComp, appleComp)
+        addVis(tailComp, appleComp)
+
+        # trace = headComp
+        # while trace != appleComp:
+        #     visibleComponents.add(trace)
+        #     trace = parent[trace]
+        # trace = tailComp
+        # while trace in parent and trace != appleComp:
+        #     visibleComponents.add(trace)
+        #     trace = parent[trace]
     else:
+        visibleComponents = {headComp}
+
         maxSize = 0
-        maxID = None
+        comp = None
         for compID in componentSizes:
             if maxSize < componentSizes[compID]:
                 maxSize = componentSizes[compID]
-                maxID = compID
-        maxVis = visibility[maxID]
-        tailVis = 0
+                comp = compID
+        
+        addVis(comp, headComp)
+        addVis(tailComp, headComp)
+    
+    sumDist = 0
+
+    for t in range(boardSize**2):
+        if curr_tail == env.head:
+            break
+        curr_tail = shiftPos(curr_tail, env.body[curr_tail])
+        for d in range(4):
+            tail_neigh = shiftPos(curr_tail, d)
+            if isValid(tail_neigh) and retractible[tail_neigh] == -1:
+                comp = tail_neigh if isAP[tail_neigh] else components[tail_neigh]
+                size = 1 if isAP[tail_neigh] else componentSizes[components[tail_neigh]]
+                if comp not in visibleComponents:
+                    visibleComponents.add(comp)
+                    sumDist += size * max(0, t - manhattanDist(tail_neigh, start))
+
+    avgWaitBonus = -sumDist / (env.body == -1).sum() * ((env.body != -1).sum() / 50)
+
+    # toTailVis = -1
+    # for d in range(4):
+    #     tail_neigh = shiftPos(env.tail, d)
+    #     if isValid(tail_neigh) and env.body[tail_neigh] == -1 and visited[tail_neigh] == 1:
+    #         if isAP[tail_neigh] == 1:
+    #             vis = visibility[tail_neigh]
+    #         else:
+    #             assert components[tail_neigh] >= 0
+    #             vis = visibility[components[tail_neigh]]
+    #         toTailVis = max(toTailVis, vis)
+    
+    # if toTailVis != -1:
+    #     maxVis = toTailVis
+    # else:
+    #     maxSize = 0
+    #     maxID = None
+    #     for compID in componentSizes:
+    #         if maxSize < componentSizes[compID]:
+    #             maxSize = componentSizes[compID]
+    #             maxID = compID
+    #     maxVis = visibility[maxID]
 
     # for first_step in range(4):
     #     start = shiftPos(env.head, first_step)
@@ -267,34 +336,35 @@ def heuristic(env):
         
     #     dfs(start)
 
-    # visited = np.zeros((boardSize, boardSize))
-    # maxVis = 0
-    # currVis = 0
-    # tailVis = False
-    # for first_step in range(4):
-    #     start = shiftPos(env.head, first_step)
-    #     if not isValid(start) or env.body[start] != -1 or visited[start]:
-    #         continue
-    #     queue = [start]
-    #     visited[start] = 1
-    #     while len(queue) > 0:
-    #         top = queue.pop()
-    #         for d in range(4):
-    #             newPos = shiftPos(top, d)
-    #             if isValid(newPos) and (env.body[newPos] == -1) and (visited[newPos] == 0) and newPos != env.head:
-    #                 visited[newPos] = 1
-    #                 queue.append(newPos)
-    #             if newPos == env.tail:
-    #                 tailVis = True
-    #     maxVis = max(maxVis, visited.sum() - currVis)
-    #     currVis = visited.sum()
+    visited = np.zeros((boardSize, boardSize))
+    tailVis = False
+    queue = [env.head]
+    visited[env.head] = 1
+    while len(queue) > 0:
+        top = queue.pop()
+        for d in range(4):
+            newPos = shiftPos(top, d)
+            if isValid(newPos) and (env.body[newPos] == -1) and (visited[newPos] == 0):
+                visited[newPos] = 1
+                queue.append(newPos)
+            if top != env.head and newPos == env.tail:
+                tailVis = True
     
-    propVis = maxVis / (env.body == -1).sum()
+    # propVis = maxVis / (env.body == -1).sum()
 
-    tailVisBonus = 0 * tailVis
-    propVisBonus = propVis # + min((propVis-0.1) * 50, 0)
+    # tailVisBonus = 0 * tailVis
+    # avgW = avgWait # + min((propVis-0.1) * 50, 0)
+
+    isBorder = env.head[0] in (0, boardSize-1) or env.head[1] in (0, boardSize-1)
+    # for d in range(4):
+    #     head_neigh = shiftPos(env.head, d)
+    #     if isValid(head_neigh):
+    #         if env.body[head_neigh] != -1 and shiftPos(head_neigh, env.body[head_neigh]) != env.head:
+    #             isBorder = True
+
+    borderBonus = 0.5 * isBorder
     
-    return distBonus + tailVisBonus + propVisBonus, (dist, tailVis, propVis)
+    return distBonus + avgWaitBonus + borderBonus, (dist, tailVis, avgWaitBonus, isBorder)
 
     # return -0.03 * (abs(env.head[0] - env.apple[0]) + abs(env.head[1] - env.apple[1]))
 
@@ -318,32 +388,63 @@ def sim():
     for t in range(50000):
         vals = []
         features = []
-        for d in range(4):
-            if d not in env.validDirs():
-                vals.append(-10**9)
+        action_pairs = []
+        for d1 in range(4):
+            if d1 not in env.validDirs():
+                vals.append(None)
                 features.append(None)
                 continue
-            curr_env = copy.deepcopy(env)
-            _ = curr_env.detAction(d)
-            heuris_val, f = heuristic(curr_env)
-            vals.append(heuris_val)
-            features.append(f)
+            env1 = copy.deepcopy(env)
+            isApple = env1.detAction(d1)
+            if isApple:
+                heuris_val, f = heuristic(env1)
+                vals.append(heuris_val+1)
+                features.append(f)
+                action_pairs.append(((heuris_val, f[1]), (d1, None)))
+                continue
+
+            val_row = []
+            feat_row = []
+            for d2 in range(4):
+                if d2 not in env1.validDirs():
+                    val_row.append(None)
+                    feat_row.append(None)
+                    continue
+                
+                env2 = copy.deepcopy(env1)
+                _ = env2.detAction(d2)
+                heuris_val, f = heuristic(env2)
+                val_row.append(heuris_val)
+                feat_row.append(f)
+                action_pairs.append(((heuris_val, f[1]), (d1, d2)))
+            
+            vals.append(val_row)
+            features.append(feat_row)
         
-        sorted_actions = [(vals[i], i) for i in range(4)]
-        sorted_actions.sort(reverse=True)
+        printToFile(outputFile, str(env))
+        printToFile(outputFile, str(vals))
+        printToFile(outputFile, str(features))
+
+        action_pairs.sort(reverse=True)
 
         safeAct = None
 
-        for val, act in sorted_actions:
-            if act not in env.validDirs():
-                continue
+        for val, (act1, act2) in action_pairs:
+            # print(f"Trying: {act1} {act2}")
             traj = copy.deepcopy(env)
-            actionHist = [act]
-            traj.detAction(act)
+            actionHist = [act1]
+            traj.detAction(act1)
+            if act2 is not None:
+                actionHist.append(act2)
+                traj.detAction(act2)
             safe = False
             for i in range(300):
-                _, (dist, tailVis, propVis) = heuristic(traj)
-                if tailVis:
+                if len(traj.validDirs()) == 0:
+                    break
+                _, f = heuristic(traj)
+                if f[1]:
+                    # print("Found safe: ")
+                    # print(traj)
                     safe = True
                     break
                 
@@ -356,31 +457,30 @@ def sim():
                     if heuris_val > bestVal:
                         bestVal = heuris_val
                         bestAct = d
-                traj.detAction(bestAct)
+                traj.detAction(bestAct, forceGrow=(i<2))
                 actionHist.append(bestAct)
                 if traj.head == traj.apple:
                     traj.apple = (-1, -1)
-                if len(traj.validDirs()) == 0:
-                    break
             if safe:
-                safeAct = act
+                safeAct = act1
                 break
         
         if safeAct is None:
+            assert len(safeActions) > 0
             for act in safeActions:
                 env.detAction(act)
         else:
             safeActions = actionHist
-            for i in range(len(safeActions)):
-                env.detAction(safeActions[0])
+            if len(actionHist) == 2:
+                env.detAction(safeAct, forceGrow = (env.body != -1).sum() < 100 and np.random.uniform() < 0.3)
                 safeActions.pop(0)
-                if env.head == env.apple:
-                    env.randomizeApple()
-                    break
-
-        printToFile(outputFile, str(env))
-        printToFile(outputFile, str(vals))
-        printToFile(outputFile, str(features))
+            else:
+                for i in range(len(safeActions)):
+                    env.detAction(safeActions[0], forceGrow = (env.body != -1).sum() < 100 and np.random.uniform() < 0.3)
+                    safeActions.pop(0)
+                    if env.head == env.apple:
+                        env.randomizeApple()
+                        break
 
         if len(env.validDirs()) == 0:
             break
