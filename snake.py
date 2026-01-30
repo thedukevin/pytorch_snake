@@ -2,7 +2,7 @@
 """
 
 Running on cloud:
-nohup python snake.py WRITE 5000 32 50 100 100 &
+nohup python snake.py WRITE 10000 32 100 100 100 &
 
 
 """
@@ -287,7 +287,7 @@ class CNN(nn.Module):
         # self.policy = nn.Linear(1024, 60)
         # self.value = nn.Linear(1024, 1)
 
-        self.conv1 = nn.Conv2d(7, 16, 5, padding=1)
+        self.conv1 = nn.Conv2d(8, 16, 5, padding=1)
         self.conv2 = nn.Conv2d(16, 16, 3, padding=1)
         self.conv3 = nn.Conv2d(16, 32, 3, padding=1)
         self.pool1 = nn.MaxPool2d(2, 2)
