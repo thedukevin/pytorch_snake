@@ -32,6 +32,7 @@ class Environment:
         self.body[self.tail] = 0
         self.randomizeApple()
         self.time = 0
+        self.computeBorder()
     
     def validDirs(self):
         validDirs = []
@@ -47,14 +48,87 @@ class Environment:
         self.head = shiftPos(self.head, d)
         self.time += 1
 
+        appleAchieved = 0
         if self.head == self.apple:
-            return 1
+            appleAchieved = 1
         elif not forceGrow:
             tailDir = self.body[self.tail]
             self.body[self.tail] = -1
             self.tail = shiftPos(self.tail, tailDir)
-        return 0
+        
+        self.computeBorder()
+        return appleAchieved
     
+    def computeBorder(self):
+
+        gridBorder = set((0, i) for i in range(boardSize)) | set((boardSize-1, i) for i in range(boardSize)) | \
+            set((i, 0) for i in range(boardSize)) | set((i, boardSize-1) for i in range(boardSize))
+        
+        touchedBorder = False
+        for el in gridBorder:
+            if self.body[el] != -1:
+                touchedBorder = True
+        
+        self.border = np.zeros((boardSize, boardSize))
+
+        if not touchedBorder:
+            for el in gridBorder:
+                self.border[el] = 1
+        else:
+
+            for d in range(4):
+                head_neigh = shiftPos(self.head, d)
+                if isValid(head_neigh) and self.body[head_neigh] != -1 and shiftPos(head_neigh, self.body[head_neigh]) == self.head:
+                    blocked1 = head_neigh
+            for d in range(4):
+                head_neigh = shiftPos(blocked1, d)
+                if isValid(head_neigh) and self.body[head_neigh] != -1 and shiftPos(head_neigh, self.body[head_neigh]) == blocked1:
+                    blocked2 = head_neigh
+            blocked = [self.head, blocked1, blocked2]
+            
+            def isTouching(pos):
+                for i in range(-1, 2):
+                    for j in range(-1, 2):
+                        neigh = (pos[0] + i, pos[1] + j)
+                        if not isValid(neigh) or (self.body[neigh] != -1 and neigh not in blocked):
+                            return True
+                return False
+            
+
+            visited = np.zeros((boardSize, boardSize))
+
+            def dfs(start):
+                queue = [start]
+                visited[start] = 1
+                while len(queue) > 0:
+                    top = queue.pop()
+                    self.border[top] = 1
+                    for d in range(4):
+                        newPos = shiftPos(top, d)
+                        if isValid(newPos) and self.body[newPos] == -1 and isTouching(newPos) and visited[newPos] == 0:
+                            visited[newPos] = 1
+                            queue.append(newPos)
+
+            for i in range(0, boardSize):
+                for j in range(0, boardSize):
+                    if self.body[i, j] == -1 and (i, j) not in blocked:
+                        dfs((i, j))
+                        break
+                for j in range(boardSize-1, -1, -1):
+                    if self.body[i, j] == -1 and (i, j) not in blocked:
+                        dfs((i, j))
+                        break
+            
+            for j in range(0, boardSize):
+                for i in range(0, boardSize):
+                    if self.body[i, j] == -1 and (i, j) not in blocked:
+                        dfs((i, j))
+                        break
+                for i in range(boardSize-1, -1, -1):
+                    if self.body[i, j] == -1 and (i, j) not in blocked:
+                        dfs((i, j))
+                        break
+
     
     def randomizeApple(self):
         openSquares = [(i, j) for i in range(boardSize) for j in range(boardSize) if self.body[i][j] == -1 and (i, j) != self.head]
@@ -80,6 +154,8 @@ class Environment:
                     grid[2*i + dir[d][0]][2*j + dir[d][1]] = '-' if d%2 == 0 else '|'
                 elif (i, j) == self.apple:
                     grid[2*i][2*j] = 'A'
+                elif self.border[i, j] == 1:
+                    grid[2*i][2*j] = '*'
                 else:
                     grid[2*i][2*j] = '.'
         s += '\n'.join(''.join(line) for line in grid)
@@ -95,10 +171,8 @@ def heuristic(env):
 
     dist = None
     if env.apple != (-1, -1):
-
         queue = [env.head]
         visited[env.head] = 1
-
         finished = False
         for i in range(boardSize**2):
             next_queue = []
@@ -122,7 +196,6 @@ def heuristic(env):
                         next_queue.append(neigh)
                 curr_tail = shiftPos(curr_tail, env.body[curr_tail])
             queue = next_queue
-    
         assert dist is not None
     
     distBonus = -dist if dist is not None else 0
@@ -355,16 +428,26 @@ def heuristic(env):
     # tailVisBonus = 0 * tailVis
     # avgW = avgWait # + min((propVis-0.1) * 50, 0)
 
-    isBorder = env.head[0] in (0, boardSize-1) or env.head[1] in (0, boardSize-1)
+    appleIsBorder = env.border[env.apple]
+    headIsBorder = env.border[env.head]
+
+    borderBonus = (2 if appleIsBorder else 0.2) * headIsBorder
+
+    # isBorder = len(set(env.head) & {0, boardSize-1}) > 0
     # for d in range(4):
     #     head_neigh = shiftPos(env.head, d)
     #     if isValid(head_neigh):
     #         if env.body[head_neigh] != -1 and shiftPos(head_neigh, env.body[head_neigh]) != env.head:
     #             isBorder = True
 
-    borderBonus = 0.5 * isBorder
+    # appleIsBorder = len(set(env.apple) & {0, boardSize-1}) > 0
+    # for d in range(4):
+    #     apple_neigh = shiftPos(env.apple, d)
+    #     if isValid(apple_neigh) and env.body[apple_neigh] != -1:
+    #         appleIsBorder = True
+    # borderBonus = (2 if appleIsBorder else 0.2) * isBorder
     
-    return distBonus + avgWaitBonus + borderBonus, (dist, tailVis, avgWaitBonus, isBorder)
+    return distBonus + avgWaitBonus + borderBonus, (dist, tailVis, avgWaitBonus, appleIsBorder, headIsBorder)
 
     # return -0.03 * (abs(env.head[0] - env.apple[0]) + abs(env.head[1] - env.apple[1]))
 
@@ -384,59 +467,43 @@ def sim():
     if outputFile is not None:
         with open(outputFile, 'w') as f:
             f.write("")
+    
+    progressFile = 'progress.txt'
 
+    with open(progressFile, 'w') as f:
+        f.write("")
+
+    actsToApple = 0
     for t in range(50000):
         vals = []
         features = []
-        action_pairs = []
-        for d1 in range(4):
-            if d1 not in env.validDirs():
+        action_vals = []
+        for d in range(4):
+            if d not in env.validDirs():
                 vals.append(None)
                 features.append(None)
                 continue
             env1 = copy.deepcopy(env)
-            isApple = env1.detAction(d1)
-            if isApple:
-                heuris_val, f = heuristic(env1)
-                vals.append(heuris_val+1)
-                features.append(f)
-                action_pairs.append(((heuris_val, f[1]), (d1, None)))
-                continue
+            isApple = env1.detAction(d)
 
-            val_row = []
-            feat_row = []
-            for d2 in range(4):
-                if d2 not in env1.validDirs():
-                    val_row.append(None)
-                    feat_row.append(None)
-                    continue
-                
-                env2 = copy.deepcopy(env1)
-                _ = env2.detAction(d2)
-                heuris_val, f = heuristic(env2)
-                val_row.append(heuris_val)
-                feat_row.append(f)
-                action_pairs.append(((heuris_val, f[1]), (d1, d2)))
-            
-            vals.append(val_row)
-            features.append(feat_row)
+            heuris_val, f = heuristic(env1)
+            vals.append(heuris_val)
+            features.append(f)
+            action_vals.append(((heuris_val, f[1]), d))
         
         printToFile(outputFile, str(env))
         printToFile(outputFile, str(vals))
         printToFile(outputFile, str(features))
 
-        action_pairs.sort(reverse=True)
+        action_vals.sort(reverse=True)
 
         safeAct = None
 
-        for val, (act1, act2) in action_pairs:
+        for val, act in action_vals:
             # print(f"Trying: {act1} {act2}")
             traj = copy.deepcopy(env)
-            actionHist = [act1]
-            traj.detAction(act1)
-            if act2 is not None:
-                actionHist.append(act2)
-                traj.detAction(act2)
+            actionHist = [act]
+            traj.detAction(act)
             safe = False
             for i in range(300):
                 if len(traj.validDirs()) == 0:
@@ -462,25 +529,31 @@ def sim():
                 if traj.head == traj.apple:
                     traj.apple = (-1, -1)
             if safe:
-                safeAct = act1
+                safeAct = act
                 break
         
         if safeAct is None:
             assert len(safeActions) > 0
             for act in safeActions:
                 env.detAction(act)
+                actsToApple += 1
+                if env.head == env.apple:
+                    with open(progressFile, 'a') as f:
+                        f.write(str(actsToApple) + '\n')
+                    actsToApple = 0
+                    env.randomizeApple()
         else:
             safeActions = actionHist
-            if len(actionHist) == 2:
-                env.detAction(safeAct, forceGrow = (env.body != -1).sum() < 100 and np.random.uniform() < 0.3)
+            for i in range(len(safeActions)):
+                env.detAction(safeActions[0])
+                actsToApple += 1
                 safeActions.pop(0)
-            else:
-                for i in range(len(safeActions)):
-                    env.detAction(safeActions[0], forceGrow = (env.body != -1).sum() < 100 and np.random.uniform() < 0.3)
-                    safeActions.pop(0)
-                    if env.head == env.apple:
-                        env.randomizeApple()
-                        break
+                if env.head == env.apple:
+                    with open(progressFile, 'a') as f:
+                        f.write(str(actsToApple) + '\n')
+                    actsToApple = 0
+                    env.randomizeApple()
+                    break
 
         if len(env.validDirs()) == 0:
             break
