@@ -8,6 +8,7 @@ https://cp-algorithms.com/graph/cutpoints.html
 
 import numpy as np
 import copy
+from termcolor import colored
 
 np.random.seed(42)
 
@@ -33,6 +34,11 @@ class Environment:
         self.randomizeApple()
         self.time = 0
         self.computeBorder()
+
+        # Debugging
+
+        self.components = np.zeros((boardSize, boardSize))
+        self.APs = np.zeros((boardSize, boardSize))
     
     def validDirs(self):
         validDirs = []
@@ -150,19 +156,60 @@ class Environment:
                     grid[2*i][2*j] = 'H'
                 elif self.body[i][j] != -1:
                     d = self.body[i][j]
-                    grid[2*i][2*j] = 'O'
+                    grid[2*i][2*j] = 'o'
                     grid[2*i + dir[d][0]][2*j + dir[d][1]] = '-' if d%2 == 0 else '|'
                 elif (i, j) == self.apple:
+                    for d in range(4):
+                        if isValid(shiftPos((i, j), d)):
+                            grid[2*i+dir[d][0]][2*j+dir[d][1]] = colored('@', "red")
+                    grid[2*i][2*j] = colored('@', "red")
+                # elif self.border[i, j] == 1:
+                #     grid[2*i][2*j] = '*'
+                elif self.APs[i, j] == 1:
                     grid[2*i][2*j] = 'A'
-                elif self.border[i, j] == 1:
-                    grid[2*i][2*j] = '*'
+                elif self.components[i, j] != 0:
+                    grid[2*i][2*j] = chr(self.components[i, j] + 96)
                 else:
                     grid[2*i][2*j] = '.'
         s += '\n'.join(''.join(line) for line in grid)
         return s
+    
+    def toCode(self):
+        assert boardSize % 2 == 0
+        s = ""
+        for i in range(boardSize):
+            for j in range(boardSize//2):
+                s += chr((self.body[i, 2*j] + 1) * 5 + (self.body[i, 2*j+1] + 1) + 97)
+        
+        def encodePos(pos):
+            return str(pos[0]) + 'x' + str(pos[1])
+        return s + '_' + encodePos(self.head) + '_' + encodePos(self.tail) + '_' + encodePos(self.apple) + '_' + str(self.time)
+    
+    def fromCode(self, code : str):
+        body, head, tail, apple, time = code.split('_')
+        self.body = np.full((boardSize, boardSize), -1)
+        for i in range(boardSize):
+            for j in range(boardSize//2):
+                c = ord(body[i*boardSize//2+j])-97
+                self.body[i, 2*j] = c // 5 - 1
+                self.body[i, 2*j+1] = c % 5 - 1
+        
+        def decodePos(s):
+            x, y = s.split('x')
+            return int(x), int(y)
+        self.head = decodePos(head)
+        self.tail = decodePos(tail)
+        self.apple = decodePos(apple)
+        self.time = int(time)
+
+        self.computeBorder()
 
 def heuristic(env):
     # print(env)
+
+    appleIsBorder = env.border[env.apple]
+    headIsBorder = env.border[env.head]
+
     # Get dynamic distance
 
     visited = np.zeros((boardSize, boardSize))
@@ -200,9 +247,37 @@ def heuristic(env):
     
     distBonus = -dist if dist is not None else 0
 
-    # Get visibility after retraction - i.e. using retractible as graph
+    # Get border distance, max it with distBonus.
 
-    retractible[curr_tail] = -1
+    if appleIsBorder and headIsBorder:
+        visited = np.zeros((boardSize, boardSize))
+        borderDist = None
+        queue = [env.head]
+        visited[env.head] = 1
+        finished = False
+        for i in range(boardSize**2):
+            next_queue = []
+            for pos in queue:
+                if pos == env.apple:
+                    borderDist = i
+                    finished = True
+                    break
+                for d in range(4):
+                    newPos = shiftPos(pos, d)
+                    if isValid(newPos) and env.border[newPos] == 1 and visited[newPos] == 0:
+                        visited[newPos] = 1
+                        next_queue.append(newPos)
+            if finished or len(queue) == 0:
+                break
+            queue = next_queue
+        if borderDist is not None:
+            distBonus = max(distBonus, 50-borderDist)
+
+    # Get visibility
+
+    vis_graph = env.body.copy()
+
+    vis_graph[env.tail] = -1
 
     visited = np.zeros((boardSize, boardSize))
     tin = np.full((boardSize, boardSize), -1)
@@ -219,7 +294,7 @@ def heuristic(env):
         children = 0
         for d in range(4):
             newPos = shiftPos(v, d)
-            if not isValid(newPos) or retractible[newPos] != -1 or newPos == p:
+            if not isValid(newPos) or vis_graph[newPos] != -1 or newPos == p:
                 continue
             if visited[newPos]:
                 low[v] = min(low[v], tin[newPos])
@@ -231,8 +306,6 @@ def heuristic(env):
                 children += 1
         if p is None and children > 1:
             isAP[v] = 1
-        
-    dfs(env.head)
 
     # print(np.where(isAP == 1))
 
@@ -251,7 +324,7 @@ def heuristic(env):
             top = queue.pop()
             for d in range(4):
                 newPos = shiftPos(top, d)
-                if isValid(newPos) and retractible[newPos] == -1 and components[newPos] == -1:
+                if isValid(newPos) and vis_graph[newPos] == -1 and components[newPos] == -1:
                     if isAP[newPos] == 0:
                         components[newPos] = compID
                         queue.append(newPos)
@@ -260,74 +333,98 @@ def heuristic(env):
                         connectedAPs.append(newPos)
         componentSizes[compID] = size
         return connectedAPs
+    
+    def searchComponents(start):
+        nonlocal componentCount
+        queue = [start]
+        if isAP[start]:
+            components[start] = -2
+        else:
+            components[start] = componentCount
+            compConnectedAPs[componentCount] = fillComponent(start, componentCount)
+            componentCount += 1
 
+        while len(queue) > 0:
+            top = queue.pop()
+            if isAP[top] == 1:
+                for d in range(4):
+                    newPos = shiftPos(top, d)
+                    if isValid(newPos) and (vis_graph[newPos] == -1) and (components[newPos] == -1):
+                        queue.append(newPos)
+                        if isAP[newPos]:
+                            components[newPos] = -2
+                            parent[newPos] = top
+                        else:
+                            components[newPos] = componentCount
+                            compConnectedAPs[componentCount] = fillComponent(newPos, componentCount)
+                            parent[componentCount] = top
+                            componentCount += 1
+            else:
+                for conn in compConnectedAPs[components[top]]:
+                    if components[conn] == -1:
+                        components[conn] = -2
+                        parent[conn] = int(components[top])
+                        queue.append(conn)
+    
     # Find visibility from apple position
+    # BUG: apple may now not be visible from head.
 
     if env.apple == (-1, -1):
         start = env.head
     else:
         start = env.apple
+        
+    dfs(start)
+    searchComponents(start)
+    appleVisible = visited[env.head]
+    if not appleVisible:
+        dfs(env.head)
+        searchComponents(env.head)
 
-    queue = [start]
-    if isAP[start]:
-        components[start] = -2
-    else:
-        components[start] = componentCount
-        compConnectedAPs[componentCount] = fillComponent(start, componentCount)
-        componentCount += 1
-
-    while len(queue) > 0:
-        top = queue.pop()
-        if isAP[top] == 1:
-            for d in range(4):
-                newPos = shiftPos(top, d)
-                if isValid(newPos) and (retractible[newPos] == -1) and (components[newPos] == -1):
-                    queue.append(newPos)
-                    if isAP[newPos]:
-                        components[newPos] = -2
-                        parent[newPos] = top
-                    else:
-                        components[newPos] = componentCount
-                        compConnectedAPs[componentCount] = fillComponent(newPos, componentCount)
-                        parent[componentCount] = top
-                        componentCount += 1
-        else:
-            for conn in compConnectedAPs[components[top]]:
-                if components[conn] == -1:
-                    components[conn] = -2
-                    parent[conn] = int(components[top])
-                    queue.append(conn)
-    
     for i in range(boardSize):
         for j in range(boardSize):
-            if retractible[i, j] == -1 and components[i, j] == -1:
+            if vis_graph[i, j] == -1 and components[i, j] == -1:
                 components[i, j] = componentCount
                 _ = fillComponent((i, j), componentCount)
                 componentCount += 1
 
-    headComp = env.head if isAP[env.head] else int(components[env.head])
-    tailComp = curr_tail if isAP[curr_tail] else int(components[curr_tail])
+    env.APs = isAP
+    env.components = components
+    # Get visibity from appl
 
-    def addVis(comp, rootComp):
+    headComp = env.head if isAP[env.head] else int(components[env.head])
+    tailComp = env.tail if isAP[env.tail] else int(components[env.tail])
+    appleComp = env.apple if isAP[env.apple] else int(components[env.apple])
+
+    def addVis(comp, rootComp, passThrough=None, addingMode=True):
+        ans = False
+        addedSize = 0
         while comp in parent and comp != rootComp:
-            visibleComponents.add(comp)
+            if passThrough is not None:
+                if comp == passThrough and rootComp != passThrough:
+                    ans = True
+            if addingMode:
+                visibleComponents.add(comp)
+            addedSize += componentSizes[comp] if comp in componentSizes else 0
             comp = parent[comp]
+        return ans, addedSize
     
+    split = False
+    includeHead = False
     if env.apple != (-1, -1):
-        appleComp = env.apple if isAP[env.apple] else int(components[env.apple])
+        
         visibleComponents = {appleComp}
 
-        addVis(headComp, appleComp)
-        addVis(tailComp, appleComp)
+        split, _ = addVis(tailComp, appleComp, passThrough=headComp)
+        if appleVisible:
+            fromComp, toComp = headComp, appleComp
+        else:
+            fromComp, toComp = tailComp, headComp
+        _, addedSize = addVis(fromComp, toComp, addingMode=False)
+        if addedSize < (env.body == -1).sum() * 0.3:
+            includeHead = True
+            addVis(fromComp, toComp)
 
-        # trace = headComp
-        # while trace != appleComp:
-        #     visibleComponents.add(trace)
-        #     trace = parent[trace]
-        # trace = tailComp
-        # while trace in parent and trace != appleComp:
-        #     visibleComponents.add(trace)
-        #     trace = parent[trace]
     else:
         visibleComponents = {headComp}
 
@@ -341,7 +438,27 @@ def heuristic(env):
         addVis(comp, headComp)
         addVis(tailComp, headComp)
     
-    sumDist = 0
+
+    # headComp = None
+    # if isAP[env.head] == 0:
+    #     headComp = components[env.head]
+    # else:
+    #     for d in range(4):
+    #         head_neigh = shiftPos(env.head, d)
+    #         if isValid(head_neigh) and retractible[head_neigh] == -1 and isAP[head_neigh] == 0:
+    #             headComp = components[head_neigh]
+    # if headComp is not None and componentSizes[headComp] < (env.body == -1).sum() * 0.3:
+    #     includeHead = True
+    #     visibleComponents.add(headComp)
+    
+    splitBonus = -500 * split
+    
+    # sumDist = 0
+    waits = []
+    sizes = []
+    waitComps = []
+
+    curr_tail = env.tail
 
     for t in range(boardSize**2):
         if curr_tail == env.head:
@@ -349,65 +466,30 @@ def heuristic(env):
         curr_tail = shiftPos(curr_tail, env.body[curr_tail])
         for d in range(4):
             tail_neigh = shiftPos(curr_tail, d)
-            if isValid(tail_neigh) and retractible[tail_neigh] == -1:
+            if isValid(tail_neigh) and vis_graph[tail_neigh] == -1:
                 comp = tail_neigh if isAP[tail_neigh] else components[tail_neigh]
                 size = 1 if isAP[tail_neigh] else componentSizes[components[tail_neigh]]
                 if comp not in visibleComponents:
                     visibleComponents.add(comp)
-                    sumDist += size * max(0, t - manhattanDist(tail_neigh, start))
-
-    avgWaitBonus = -sumDist / (env.body == -1).sum() * ((env.body != -1).sum() / 50)
-
-    # toTailVis = -1
-    # for d in range(4):
-    #     tail_neigh = shiftPos(env.tail, d)
-    #     if isValid(tail_neigh) and env.body[tail_neigh] == -1 and visited[tail_neigh] == 1:
-    #         if isAP[tail_neigh] == 1:
-    #             vis = visibility[tail_neigh]
-    #         else:
-    #             assert components[tail_neigh] >= 0
-    #             vis = visibility[components[tail_neigh]]
-    #         toTailVis = max(toTailVis, vis)
+                    wait = max(0, t - manhattanDist(tail_neigh, start))
+                    waitComps.append(comp)
+                    waits.append(wait)
+                    sizes.append(size)
+                    # sumDist += size * wait * min(150, wait) / 50
     
-    # if toTailVis != -1:
-    #     maxVis = toTailVis
-    # else:
-    #     maxSize = 0
-    #     maxID = None
-    #     for compID in componentSizes:
-    #         if maxSize < componentSizes[compID]:
-    #             maxSize = componentSizes[compID]
-    #             maxID = compID
-    #     maxVis = visibility[maxID]
+    waits.append(0)
+    sizes.append((vis_graph == -1).sum() - sum(sizes))
 
-    # for first_step in range(4):
-    #     start = shiftPos(env.head, first_step)
-    #     if not isValid(start) or env.body[start] != -1 or visited[start]:
-    #         continue
-        
-    #     tarjan_timer = 0
-    #     def dfs(v, p=None):
-    #         global tarjan_timer
-    #         visited[v] = 1
-    #         tin[v] = low[v] = tarjan_timer
-    #         tarjan_timer += 1
+    waits = np.array(waits)
+    sizes = np.array(sizes)
 
-    #         size[v] = 1
-            
-    #         for d in range(4):
-    #             newPos = shiftPos(v, d)
-    #             if isValid(newPos) and (env.body[newPos] == -1) and newPos != env.head:
-    #                 if newPos == p:
-    #                     continue
-    #                 if visited[newPos]:
-    #                     low[v] = min(low[v], tin[newPos])
-    #                 else:
-    #                     dfs(newPos, v)
-    #                     low[v] = min(low[v], low[newPos])
-    #                     if low[newPos] >= tin[v] and p is not None:
-    #                         isAP[v] = 1
-        
-    #     dfs(start)
+    weighted_sizes = (waits + 50) * sizes
+
+    avgWaitBonus = -(waits * weighted_sizes).sum() / weighted_sizes.sum()
+
+    # avgWaitBonus = -sumDist / (env.body == -1).sum()
+
+
 
     visited = np.zeros((boardSize, boardSize))
     tailVis = False
@@ -423,33 +505,12 @@ def heuristic(env):
             if top != env.head and newPos == env.tail:
                 tailVis = True
     
-    # propVis = maxVis / (env.body == -1).sum()
+    crampedBonus = -5 * (manhattanDist(env.head, env.tail) <= 2)
 
-    # tailVisBonus = 0 * tailVis
-    # avgW = avgWait # + min((propVis-0.1) * 50, 0)
-
-    appleIsBorder = env.border[env.apple]
-    headIsBorder = env.border[env.head]
-
-    borderBonus = (2 if appleIsBorder else 0.2) * headIsBorder
-
-    # isBorder = len(set(env.head) & {0, boardSize-1}) > 0
-    # for d in range(4):
-    #     head_neigh = shiftPos(env.head, d)
-    #     if isValid(head_neigh):
-    #         if env.body[head_neigh] != -1 and shiftPos(head_neigh, env.body[head_neigh]) != env.head:
-    #             isBorder = True
-
-    # appleIsBorder = len(set(env.apple) & {0, boardSize-1}) > 0
-    # for d in range(4):
-    #     apple_neigh = shiftPos(env.apple, d)
-    #     if isValid(apple_neigh) and env.body[apple_neigh] != -1:
-    #         appleIsBorder = True
-    # borderBonus = (2 if appleIsBorder else 0.2) * isBorder
+    # if (env.body != -1).sum() > 700:
+    #     return 0, (0, tailVis, "lmao")
     
-    return distBonus + avgWaitBonus + borderBonus, (dist, tailVis, avgWaitBonus, appleIsBorder, headIsBorder)
-
-    # return -0.03 * (abs(env.head[0] - env.apple[0]) + abs(env.head[1] - env.apple[1]))
+    return distBonus + avgWaitBonus + splitBonus + crampedBonus, (distBonus, tailVis, avgWaitBonus, appleIsBorder, headIsBorder, splitBonus, includeHead, crampedBonus, waits, sizes, waitComps)
 
 def printToFile(file, text):
     if file is None:
@@ -491,16 +552,17 @@ def sim():
             features.append(f)
             action_vals.append(((heuris_val, f[1]), d))
         
-        printToFile(outputFile, str(env))
+        heuristic(env)
+        printToFile(outputFile, env.toCode())
         printToFile(outputFile, str(vals))
         printToFile(outputFile, str(features))
+        printToFile(outputFile, str(env))
 
         action_vals.sort(reverse=True)
 
         safeAct = None
 
         for val, act in action_vals:
-            # print(f"Trying: {act1} {act2}")
             traj = copy.deepcopy(env)
             actionHist = [act]
             traj.detAction(act)
@@ -510,8 +572,6 @@ def sim():
                     break
                 _, f = heuristic(traj)
                 if f[1]:
-                    # print("Found safe: ")
-                    # print(traj)
                     safe = True
                     break
                 
@@ -559,68 +619,30 @@ def sim():
             break
     return (env.body != -1).sum() + 1, env.time
 
-# def sim():
-#     env = Environment()
+# aaaaaaaaaaaaaaablkaaaaascsncpaeokaaaaaesetsuaeokaaagkaaaaauaeolgggwqghaaauaeooaaabjabhaauaeooaaaaaaacaauaeooaaaaaaabghuaeooaaaaaaansruaeooaaaaaaalhwuaeooaaaaaaaonxuaeooaaaaaaajghuaeooaaaaacsnssuaeooaaaaabohhhuaeooaaaaaaonwwuaeooaaaaaaohwwuaeooaaaaaaonwwuaoooaaaaaaohwwuaoooaaaaactnwwuaoooaaaaacjhwvuaoooaaaaacwswxaaoooaaaaacvhvoaaoooaaaaacwsxjaaoooaaaaacwgjnaaoooaanssrwxstaaooonnlghwwggjaaoooooonswwuaaaaoojoooggwwuaaaaooaottsssxuaaaajjaggggggguaaaa_1x15_17x0_7x19_20935
+# nsssssssssnsssslllllllkaeghhgooooooookaesqvwtooooooolkbhxsseooooooookeqggkeooooooookbwsskeooooooookesaekeooooooookaaaakeooooooookaaaakeooooooojlhacskeooooooopjnacekeooooojlwspabokeooooopjbkaaaogooooogwsrpnaaosooojonraxaoaaloooonjkxaactsstooojospacrrhhhjotjnpaansxwvvvwqjnkaadpabwwssqjnokaaaaaenwhhxstokaaaaaegwwwhhjokaaaaaesswwwwxokaaabgghhvwvwjokaaaessrwxnxnxokaaaaaawvololookaaaaaawxjjjjjokaaaaabwjnssssokaaaaaenxggggoopaaaaaelosssstgggggggjjgggggj_18x8_6x25_9x27_40885
+# nsssssssaaaaanskbgggkaeaaaaalokennskaeaaaactokeolokaeaaaanjokeoookaeaaaalwtkeooogkepnsstnekeoooskaxlllolokeoologheooooookeoooosqojjjoookeooolhxossrtookeoooonehhhwjookeooooloqvwwwtokeooooohxsrvwjoketjojonhhwxqwtkbopjntlwwvkxnekekwsqoonwwpeqokehvlooolwvllookerxjjooonxjjoooavossooolosrtooaxggojjojlgwjooaensonsjntnswtoaelooqosqjllwjoaeoogjggjntonxoaeoosnsssqoolooaeololgggjojojoaeooojnssrtrtpoaejjospaawhwhxoaessgkaabvvvvjoaaaespaaessaaajaaaaaaaaaaaaaa_17x1_28x23_2x18_45783
+# nsssssnssssnssskaaaaelllgjlllokcpaaeooorstoookcxspejolwhjoookcaaxentorwwtookcaaeehjgwwwjookchaeerxpnwwwtokcwaehxhxgwvwjokcwaeqgvorrxnwtlbwaauaakwvjlvoonraaunnhxxrtntohwaaxttqghvoloonwaagghuacxoooohwabunswpbojjoonwaeakaxuctrstoqwaecphbuchwhjloraecawjabwwwxolwaechwuaanvwjoonaecwwuaahxsxoolkecwwuaanghjoojkecwwuaalwsxoonqobvvuantngjoogojaaaaagjlwsoontnsnnsnsstneooljgooljlggjloooonaooosjnsstooottaoogosqlloookgjaoonggjjjjookxsstttsssssstjgggggggggggggj_9x2_7x10_16x7_50808
 
-#     outputFile = 'snake.txt'
+s = 'aaaaaaaaaaaaaaablkaaaaascsncpaeokaaaaaesetsuaeokaaagkaaaaauaeolgggwqghaaauaeooaaabjabhaauaeooaaaaaaacaauaeooaaaaaaabghuaeooaaaaaaansruaeooaaaaaaalhwuaeooaaaaaaaonxuaeooaaaaaaajghuaeooaaaaacsnssuaeooaaaaabohhhuaeooaaaaaaonwwuaeooaaaaaaohwwuaeooaaaaaaonwwuaoooaaaaaaohwwuaoooaaaaactnwwuaoooaaaaacjhwvuaoooaaaaacwswxaaoooaaaaacvhvoaaoooaaaaacwsxjaaoooaaaaacwgjnaaoooaanssrwxstaaooonnlghwwggjaaoooooonswwuaaaaoojoooggwwuaaaaooaottsssxuaaaajjaggggggguaaaa_1x15_17x0_7x19_20935'
 
-#     with open(outputFile, 'w') as f:
-#         f.write("")
+env = Environment()
+env.fromCode(s)
 
-#     for t in range(50000):
-#         bestValue = -10**9
-#         bestEnv = None
-#         vals = []
-#         features = []
-#         bestFeatures = None
-#         for d in range(4):
-#             curr_env = copy.deepcopy(env)
-#             for i in range(1):
-#             # for i in range(boardSize):
-#                 if d not in curr_env.validDirs():
-#                     vals.append(None)
-#                     features.append(None)
-#                     break
-#                 apple = curr_env.detAction(d)
-#                 heuris_val, f = heuristic(curr_env)
-#                 value = apple - i * stepPenalty + heuris_val
-#                 vals.append(value)
-#                 features.append(f)
-#                 if bestValue < value:
-#                     bestValue = value
-#                     bestFeatures = f
-#                     bestEnv = copy.deepcopy(curr_env)
+print(heuristic(env))
+print(env)
 
-#         dist, tailVis, propVis = bestFeatures
-#         # if not tailVis:
-#         #     break
-#         with open(outputFile, 'a') as f:
-#             f.write(str(env) + '\n')
-#             f.write(str(vals) + '\n')
-#             f.write(str(features) + '\n')
+# sizes = []
+# lengths = []
+# wins = []
 
-#         env = bestEnv
-#         if env.head == env.apple:
-#             env.randomizeApple()
-#         while len(env.validDirs()) == 1:
-#             env.detAction(env.validDirs()[0])
-#             if env.head == env.apple:
-#                 env.randomizeApple()
-#         if len(env.validDirs()) == 0:
-#             break
-#     return (env.body != -1).sum() + 1, env.time
-
-sizes = []
-lengths = []
-wins = []
-
-for i in range(1):
-    size, length = sim()
-    print(size, length)
-    sizes.append(size)
-    lengths.append(length)
-    win = size == boardSize ** 2
-    wins.append(win)
+# for i in range(1):
+#     size, length = sim()
+#     print(size, length)
+#     sizes.append(size)
+#     lengths.append(length)
+#     win = size == boardSize ** 2
+#     wins.append(win)
 
 # print("Average size: " + str(np.array(sizes).mean()))
 # print("Average length: " + str(np.array(lengths).mean()))
